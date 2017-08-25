@@ -79,49 +79,9 @@ void insertWordinList(invertedIndex* inverted, char* word, int numberDoc, StopWo
 void printDocumentData(doc_data* document);
 void insertDatainInverted(invertedIndex* InvertedIndex, doc_data* document);
 int searchDocData(invertedIndex* InvertedIndex, doc_data* document);
+void addInListSW(StopWords* sw, char* word);
+void insertWordsinDataDoc(doc_data* docData,char* word,int numberLock);
 
-
-/*
-
-Esta funcion obtiene el numero de palabras de un documento el cual es pasado como parametro en "file".
-
-Este documento es abierto y cerrado en la misma funcion por lo que no hay error si se vuelve a abrir.
-
-SALIDA : un entero correspondiente al contados de 
-
-*/
-int wordSize(char* file){
-
-	int cont=0; 
-
-	char* word = (char*)malloc(sizeof(char)*MAX_CHARACTER); // reserva de memoria para almacenar una palabra.
-	
-	
-	FILE* pt = fopen(file,"rb"); // se abre el archivo.
-
-	//comprobacion si existe puntero al archivo.
-	if(pt){ 
-		
-		printf("abierto \n");
-	}
-	else{ 
-		
-		printf("No se pudo abrir el archivo \n");
-		return 0;
-	}
-	
-	//ciclo para recorrer el archivo.
-	while(!feof(pt)){
-		fscanf(pt,"%s",word);
-		cont++;
-	}
-	fclose(pt);
-	printf("cantidad de stopWords: %d \n",cont);
-
-	free(word);
-	return cont;
-
-}
 
 /*
 
@@ -139,8 +99,8 @@ StopWords* loadStopWords(char* pathStopWordsFile /*, code *statusCode*/){
 	StopWords* listSW=(StopWords*)malloc(sizeof(StopWords));
 	
 	
-	listSW->0;
-	listSW->listStopWords= (words*)malloc(sizeof(word));
+	listSW->size=0;
+	listSW->listStopWords= NULL;
 
 	
 	
@@ -152,20 +112,22 @@ StopWords* loadStopWords(char* pathStopWordsFile /*, code *statusCode*/){
 	else{ 
 		/*statusCode = ERR_FILE_NOT_FOUND; */
 		printf("No se pudo abrir el archivo \n");
-		return words;
+		return listSW;
 	}
 
-	int i;
+	
 	//ciclo para leer las stopWords.
 	while(!feof(pt)){
 		char* word= (char*)malloc(sizeof(char)*MAX_CHARACTER);
 		fscanf(pt,"%s", word);
+		printf("%s \n", word);
 		addInListSW(listSW,word);
 		
 	}
+	printf("cantidad de stopWords: %d \n",listSW->size);
 
 	fclose(pt);
-	return words;
+	return listSW;
 }
 /**
 
@@ -212,9 +174,9 @@ invertedIndex* createIndex(char* pathDocumentsFile, StopWords *sw/*, code *statu
 	while(!feof(pt)){
 
 		doc_data* aux = (doc_data*)malloc(sizeof(doc_data));
-		aux->title = (char**)malloc(sizeof(char*));
-		aux->author = (char**)malloc(sizeof(char*));
-		aux->bibliografy = (char**)malloc(sizeof(char*));
+		aux->title = NULL;
+		aux->author = NULL;
+		aux->bibliografy = NULL;;
 		aux->nxt=NULL;
 
 		char* word=(char*)malloc(sizeof(char*)*MAX_CHARACTER);
@@ -229,18 +191,16 @@ invertedIndex* createIndex(char* pathDocumentsFile, StopWords *sw/*, code *statu
 			
 
 		}
-		int i=0;
+
 		while(lock == 2){
 		
 			
 			char* word=(char*)malloc(sizeof(char*)*MAX_CHARACTER);
 			fscanf(pt,"%s",word);
+			printf("word leido : %s\n",word );
 			lock = numberLock(word,lock);
-			i++;
-			//printf("fallo 1\n");
-			aux->title = (char**)realloc(aux->title,sizeof(char*)*i);
-			//printf("fallo 2\n");
-			aux->title[i-1]=word;
+			insertWordsinDataDoc(aux,word,2);
+			printDocumentData(inverted->docList);
 			while(serchEspecialCharacter(word) == TRUE){
 				word = cleanEspecilCharacter(word);
 			
@@ -251,15 +211,13 @@ invertedIndex* createIndex(char* pathDocumentsFile, StopWords *sw/*, code *statu
 	
 			}
 		}
-		i=0;
+		
 		while(lock == 3){
 
 			char* word=(char*)malloc(sizeof(char*)*MAX_CHARACTER);
 			fscanf(pt,"%s",word);
 			lock = numberLock(word,lock);
-			i++;
-			aux->author = (char**)realloc(aux->author,sizeof(char*)*i);
-			aux->author[i-1]=word;
+			insertWordsinDataDoc(aux,word,3);
 			while(serchEspecialCharacter(word) == TRUE){
 				word = cleanEspecilCharacter(word);
 			
@@ -269,15 +227,13 @@ invertedIndex* createIndex(char* pathDocumentsFile, StopWords *sw/*, code *statu
 	
 			}
 		}
-		i=0;
+		
 		while(lock == 4){
 
 			char* word=(char*)malloc(sizeof(char*)*MAX_CHARACTER);
 			fscanf(pt,"%s",word);
 			lock = numberLock(word,lock);
-			i++;
-			aux->bibliografy = (char**)realloc(aux->bibliografy,sizeof(char*)*i);
-			aux->bibliografy[i-1]=word;
+			insertWordsinDataDoc(aux,word,4);
 			while(serchEspecialCharacter(word) == TRUE){
 				word = cleanEspecilCharacter(word);
 			
@@ -322,6 +278,66 @@ invertedIndex* createIndex(char* pathDocumentsFile, StopWords *sw/*, code *statu
 	//printInvertedIndex(inverted);
 	return inverted;
 	
+
+}
+
+void insertWordsinDataDoc(doc_data* docData,char* word,int numberLock){
+
+	words* new = (words*)malloc(sizeof(words));
+	new->word = word;
+	new->nxt = NULL;
+
+	if(numberLock == 2){
+		
+		if(docData->title == NULL){
+			docData->title = new;
+		}
+		else{
+
+			words* aux = docData->title;
+			while(aux != NULL){
+				aux=aux->nxt;
+			}
+			aux = new;
+
+		}
+		
+			
+	}
+	if(numberLock == 3){
+		if(docData->author == NULL){
+			docData->author = new;
+		}
+		else{
+
+			words* aux = docData->author;
+			while(aux != NULL){
+				aux=aux->nxt;
+			}
+			aux = new;
+
+		}
+			
+				
+	}
+	if(numberLock == 4){
+		if(docData->bibliografy == NULL){
+			docData->bibliografy = new;
+		}
+		else{
+
+			words* aux = docData->bibliografy;
+			while(aux != NULL){
+				aux=aux->nxt;
+			}
+			aux = new;
+
+		}
+			
+			
+	}
+
+
 
 }
 
@@ -525,6 +541,7 @@ int documentCont(char* file){
 			//buffer=NULL;
 		}
 	}
+	printf("cerrado y funcionando \n");
 	fclose(pt);
 	return cont;
 
@@ -568,14 +585,16 @@ document* getLastDoc(term* Term){
 }
 
 void printDocumentData(doc_data* document){
-	int i;	
+
 	while(document != NULL){
 
 		printf("el indice del documento actual es : %d \n",document->index);
+		words* aux = document->title;
 
-		for (i = 0; document->title[i]; i++)
+		while(aux != NULL)
 		{
-			printf("%s ",document->title[i] );
+			printf("%s ",document->title->word);
+			aux = aux->nxt;
 		}
 		printf("\n");
 		document = document->nxt;
@@ -686,13 +705,12 @@ int serchEspecialCharacter(char* word){
 	return FALSE;
 }
 
-int searchStopWords(char* word, StopWords* sp){
-	int i=0;
+int searchStopWords(char* word, StopWords* sw){
 	
-	
-	for(i=0;i<sp->size;i++){
+	words* aux = sw->listStopWords;
+	while(aux !=NULL){
 		
-		if(strcmp(word, sp->listStopWords[i]) == 0){
+		if(strcmp(word, sw->listStopWords->word) == 0){
 			//printf("la palabra: %s es un stopWord\n",word);
 			return TRUE;
 		}
@@ -758,6 +776,32 @@ void saveIndex(invertedIndex* i, int* id/*, code *statusCode*/){
 
 }
 
+void addInListSW(StopWords* sw, char* word){
+
+	
+	words* new = (words*)malloc(sizeof(words));
+	new->word =word;
+	new->nxt =NULL;
+
+	if(sw->listStopWords == NULL){
+
+		sw->listStopWords = new;
+		sw->size++;
+	}
+	else{
+		words* aux =sw->listStopWords;
+
+		while(aux !=NULL){
+			aux = aux->nxt;
+
+		}
+		sw->size++;
+		aux = new;
+
+	}
+
+}
+
 int numberLock(char* word,int lock){
 
 	if(strcmp(word, INDEX_TEXT) == 0){
@@ -790,10 +834,10 @@ int numberLock(char* word,int lock){
 //invertedIndex* loadIndex(int id/*, code *statusCode*/)
 
 int main(){
-	int* id = (int*)malloc(sizeof(int));
-	//int i= documentCont("hola.txt");
+	//int* id = (int*)malloc(sizeof(int));
+	int i= documentCont("hola.txt");
 	StopWords* w = loadStopWords("StopWords.txt");
-	//printf("resultado de documentos = %d\n",i);
+	printf("resultado de documentos = %d\n",i);
 	invertedIndex* hola = createIndex("hola.txt", w/*, code *statusCode*/);
 	//saveIndex(hola, id/*, code *statusCode*/);
 	
