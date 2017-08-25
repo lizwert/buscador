@@ -12,19 +12,23 @@
 #define TRUE 1
 #define FALSE 0
 
-//estructuras esenciales 
+typedef struct nodo {
+ char* word;
+ struct nodo* nxt;
+ 
+}words;
 
 typedef struct {
  int size;
- char** listStopWords;
+ words* listStopWords;
  
 }StopWords;
 
 typedef struct data {
 	int index;
-	char** title;
-	char** author;
-	char** bibliografy;
+	words* title;
+	words* author;
+	words* bibliografy;
 	struct data* nxt;
 }doc_data;
 
@@ -132,11 +136,11 @@ SALIDA: un puntero a la estructura StopWords donde estan almacenadas las palabra
 StopWords* loadStopWords(char* pathStopWordsFile /*, code *statusCode*/){
 
 
-	StopWords* words=(StopWords*)malloc(sizeof(StopWords));
+	StopWords* listSW=(StopWords*)malloc(sizeof(StopWords));
 	
 	
-	words->size=wordSize(pathStopWordsFile);
-	words->listStopWords= (char**)malloc(sizeof(char*)*words->size);
+	listSW->0;
+	listSW->listStopWords= (words*)malloc(sizeof(word));
 
 	
 	
@@ -153,10 +157,10 @@ StopWords* loadStopWords(char* pathStopWordsFile /*, code *statusCode*/){
 
 	int i;
 	//ciclo para leer las stopWords.
-	for(i=0;i<words->size;i++){
+	while(!feof(pt)){
 		char* word= (char*)malloc(sizeof(char)*MAX_CHARACTER);
 		fscanf(pt,"%s", word);
-		words->listStopWords[i]=word;
+		addInListSW(listSW,word);
 		
 	}
 
