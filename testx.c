@@ -381,9 +381,9 @@ void getDocumentData(invertedIndex* inverted,char* pathDocumentsFile){
 	while(!feof(pt)){
 		doc_data* aux = (doc_data*)malloc(sizeof(doc_data));
 		aux->index = 0;
-		aux->title = (char**)malloc(sizeof(char*)*100);
-		aux->author = (char**)malloc(sizeof(char*)*100);
-		aux->bibliografy = (char**)malloc(sizeof(char*)*100);		
+		aux->title = (char**)malloc(sizeof(char*)*400);
+		aux->author = (char**)malloc(sizeof(char*)*400);
+		aux->bibliografy = (char**)malloc(sizeof(char*)*400);		
 		aux->nxt=NULL;
 
 		for (i = 0; i < 100; i++)
@@ -891,7 +891,7 @@ void saveIndex(invertedIndex* i, int* id/*, code *statusCode*/){
 	srand(time(0));
 	char nombre_archivo[100];
 	char* horario = DateHour();
-	int j;
+	int j,k;
 	(*id) = 100 + rand() % 1000;
 	sprintf(nombre_archivo,"%d.id",*id);
 	while(fopen(nombre_archivo,"r")!=NULL)
@@ -921,6 +921,42 @@ void saveIndex(invertedIndex* i, int* id/*, code *statusCode*/){
 		}
 		aux = aux->nxt;
 		fprintf(archivo,"\n");
+	}
+	doc_data* aux2 = i->docList;
+	while(aux2 != NULL){
+		
+		fprintf(archivo,".I ");
+		fprintf(archivo,"%d\n",aux2->index);
+		k=0;
+		fprintf(archivo,".T ");
+		while(strcmp("-----", aux2->title[k]) != 0){
+
+			fprintf(archivo,"%s ",aux2->title[k]);
+			k++;
+
+		}
+		fprintf(archivo,"\n");
+		fprintf(archivo,".A ");
+		k=0;
+		while(strcmp("-----", aux2->author[k]) != 0){
+
+			fprintf(archivo,"%s ",aux2->author[k]);
+			k++;
+
+		}
+		fprintf(archivo,"\n");
+		fprintf(archivo,".B ");
+		k=0;
+		while(strcmp("-----", aux2->bibliografy[k]) != 0){
+
+			fprintf(archivo,"%s ",aux2->bibliografy[k]);
+			k++;
+
+		}
+		fprintf(archivo,"\n");
+		aux2 = aux2->nxt;
+
+
 	}
 	printf("el valor del id es %d\n",*id);
 	fclose(archivo);
@@ -988,12 +1024,12 @@ int numberLock(char* word,int lock){
 //invertedIndex* loadIndex(int id/*, code *statusCode*/)
 
 int main(){
-	//int* id = (int*)malloc(sizeof(int));
-	int i= documentCont("hola.txt");
+	int* id = (int*)malloc(sizeof(int));
+	int i= documentCont("TestCollection.txt");
 	StopWords* w = loadStopWords("StopWords.txt");
 	printf("resultado de documentos = %d\n",i);
-	invertedIndex* hola = createIndex("hola.txt", w/*, code *statusCode*/);
-	//saveIndex(hola, id/*, code *statusCode*/);
+	invertedIndex* hola = createIndex("TestCollection.txt", w/*, code *statusCode*/);
+	saveIndex(hola, id/*, code *statusCode*/);
 	
 	
 	
