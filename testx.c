@@ -82,7 +82,8 @@ int searchDocData(invertedIndex* InvertedIndex, doc_data* document);
 void addInListSW(StopWords* sw, char* word);
 void insertWordsinDataDoc(words* docData,char* word);
 void getDocumentData(invertedIndex* inverted,char* pathDocumentsFile);
-
+invertedIndex* loadIndex(int id/*, code *statusCode*/);
+void insertDataIndex(invertedIndex* index,char* word, int doc, int frecuency);
 
 /*
 
@@ -679,7 +680,7 @@ int documentCont(char* file){
 
 	char buffer[MAX_CHARACTER];
 	int cont=0;
-	FILE* pt = fopen(file,"r");
+	FILE* pt = fopen(file,"rb");
 	if(pt){ 
 		/*statusCode = OK;*/
 		printf("abierto \n");
@@ -933,8 +934,9 @@ void saveIndex(invertedIndex* i, int* id/*, code *statusCode*/){
 
 		}
 		aux = aux->nxt;
-		fprintf(archivo,"\n");
+		fprintf(archivo,"%d-%d\n",0,0);
 	}
+	fprintf(archivo,"-----\n");
 	doc_data* aux2 = i->docList;
 	while(aux2 != NULL){
 		
@@ -948,7 +950,7 @@ void saveIndex(invertedIndex* i, int* id/*, code *statusCode*/){
 			k++;
 
 		}
-		fprintf(archivo,"\n");
+		fprintf(archivo,"||\n");
 		fprintf(archivo,".A ");
 		k=0;
 		while(strcmp("-----", aux2->author[k]) != 0){
@@ -957,7 +959,7 @@ void saveIndex(invertedIndex* i, int* id/*, code *statusCode*/){
 			k++;
 
 		}
-		fprintf(archivo,"\n");
+		fprintf(archivo,"||\n");
 		fprintf(archivo,".B ");
 		k=0;
 		while(strcmp("-----", aux2->bibliografy[k]) != 0){
@@ -966,7 +968,7 @@ void saveIndex(invertedIndex* i, int* id/*, code *statusCode*/){
 			k++;
 
 		}
-		fprintf(archivo,"\n");
+		fprintf(archivo,"||\n");
 		aux2 = aux2->nxt;
 
 
@@ -974,6 +976,91 @@ void saveIndex(invertedIndex* i, int* id/*, code *statusCode*/){
 	printf("el valor del id es %d\n",*id);
 	fclose(archivo);
 	
+
+}
+
+invertedIndex* loadIndex(int id/*, code *statusCode*/){
+
+	invertedIndex* inverted = (invertedIndex*)malloc(sizeof(invertedIndex));
+	inverted->size=0;
+	inverted->terms = NULL;
+	inverted->doc_size =0;
+
+	//reserva de memoria para una lista de documentos.
+	inverted->docList = NULL;
+	int i,j;
+	int* d = (int*)malloc(sizeof(int));
+	char Read[100];
+	sprintf(Read,"%d.id",id);
+	FILE* pt = fopen(Read,"rb");
+	if(pt){ 
+		/*statusCode = OK;*/
+		printf("abierto \n");
+	}
+	else{ 
+		/*statusCode = ERR_FILE_NOT_FOUND; */
+		printf("No se pudo abrir el archivo \n");
+		return 0;
+	}
+	char* word=(char*)malloc(sizeof(char*)*MAX_CHARACTER);
+
+	while(strcmp("-----", word) != 0){
+		
+		
+		fscanf(pt,"%s",word);
+		
+		while(TRUE){
+			
+			fscanf(pt,"%d-%d",&i,&j);
+			printf("palabra agregada ____ %s ____\n",word);
+			printf("agregada a : %d-%d \n",i,j);
+
+			if(i==0 && j == 0){
+
+				break;
+			}
+			insertDataIndex(inverted,word,i,j);
+
+		}
+		
+		
+
+	}
+	fclose(pt);
+	saveIndex(inverted, d/*, code *statusCode*/);
+	return inverted;
+	
+
+
+}
+
+void insertDataIndex(invertedIndex* index,char* word, int doc, int frecuency){
+
+	if(searchTerm(word,index)==TRUE){
+		//printf("repetido\n");
+		term* aux = getTerm(word,index);
+		//printf("repetido, en otro documento\n");
+						
+		document* newDoc = (document*)malloc(sizeof(document));
+		newDoc->doc=doc;
+		newDoc->frecuency=frecuency;
+		newDoc->nxt=NULL;
+					
+		insertLastDoc(aux,newDoc); 
+
+	}
+	else{
+				
+		document* newDoc = (document*)malloc(sizeof(document));
+		newDoc->doc = doc;
+		newDoc->frecuency =frecuency;
+		newDoc->nxt = NULL;
+				
+		insertTerm(index,word,newDoc);
+
+	}
+	
+
 
 }
 
@@ -1038,11 +1125,12 @@ int numberLock(char* word,int lock){
 
 int main(){
 	int* id = (int*)malloc(sizeof(int));
-	int i= documentCont("exp.txt");
+	int i= documentCont("TestCollection.txt");
 	StopWords* w = loadStopWords("StopWords.txt");
 	printf("resultado de documentos = %d\n",i);
-	invertedIndex* hola = createIndex("exp.txt", w/*, code *statusCode*/);
+	invertedIndex* hola = createIndex("TestCollection.txt", w/*, code *statusCode*/);
 	saveIndex(hola, id/*, code *statusCode*/);
+	invertedIndex* new =loadIndex(*id/*, code *statusCode*/);
 	
 	
 	
