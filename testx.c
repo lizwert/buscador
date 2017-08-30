@@ -376,7 +376,7 @@ void getDocumentData(invertedIndex* inverted,char* pathDocumentsFile){
 
 
 	//obtencion del lock correspondiente a la palabra leida.
-	
+
 	
 	while(!feof(pt)){
 		doc_data* aux = (doc_data*)malloc(sizeof(doc_data));
@@ -395,20 +395,21 @@ void getDocumentData(invertedIndex* inverted,char* pathDocumentsFile){
 
 
 		char* word=(char*)malloc(sizeof(char*)*MAX_CHARACTER);
-		fscanf(pt,"%s",word);
 		
-		lock = numberLock(word,lock);
 
 		if(lock == 1){
 			printf("se ha entrado al lock 1\n");
 			fscanf(pt,"%d\n",&numberDoc);
+			printf("-------------------------numero de numberdoc------------------------- %d\n",numberDoc );
 			fscanf(pt,"%s",word);
-			printf("palabra leida %s --1--\n",word );
 			lock = numberLock(word,lock);
 
 
 			aux->index = numberDoc;
 		}
+		fscanf(pt,"%s",word);
+		printf("**************************palabra fuera del los hile leida : %s\n",word );
+		lock = numberLock(word,lock);
 		i=0;
 		while(lock == 2){
 		
@@ -417,8 +418,11 @@ void getDocumentData(invertedIndex* inverted,char* pathDocumentsFile){
 			fscanf(pt,"%s",word);
 			lock = numberLock(word,lock);
 			aux->title[i]=word;
-			printf("la palabra : %s se ha agregado en el indice %d \n",aux->title[i],i );
+			printf("la titulo: %s se ha agregado en el indice %d \n",aux->title[i],i );
 			i++;
+			if(feof(pt)){
+				break;
+			}
 			//insertWordsinDataDoc(aux->title,word);
 			
 
@@ -429,8 +433,13 @@ void getDocumentData(invertedIndex* inverted,char* pathDocumentsFile){
 			char* word=(char*)malloc(sizeof(char*)*MAX_CHARACTER);
 			fscanf(pt,"%s",word);
 			lock = numberLock(word,lock);
+			printf("palabra ultima leida : %s\n",word );
 			aux->author[i]=word;
+			//printf("la author : %s se ha agregado en el indice %d \n",aux->author[i],i );
 			i++;
+			if(feof(pt)){
+				break;
+			}
 			//insertWordsinDataDoc(aux->author,word);
 			
 		}
@@ -441,7 +450,11 @@ void getDocumentData(invertedIndex* inverted,char* pathDocumentsFile){
 			fscanf(pt,"%s",word);
 			lock = numberLock(word,lock);
 			aux->bibliografy[i]=word;
+			printf("la biblio : %s se ha agregado en el indice %d \n",aux->bibliografy[i],i );
 			i++;
+			if(feof(pt)){
+				break;
+			}
 			//insertWordsinDataDoc(aux->bibliografy,word);
 
 
@@ -452,7 +465,7 @@ void getDocumentData(invertedIndex* inverted,char* pathDocumentsFile){
 			insertDatainInverted(inverted,aux);
 			printf("se ha agregado el dada doc del documento %d al indice \n", aux->index);
 		}
-		
+
 	
 		/*char* word=(char*)malloc(sizeof(char*)*MAX_CHARACTER);
 
@@ -1025,10 +1038,10 @@ int numberLock(char* word,int lock){
 
 int main(){
 	int* id = (int*)malloc(sizeof(int));
-	int i= documentCont("TestCollection.txt");
+	int i= documentCont("exp.txt");
 	StopWords* w = loadStopWords("StopWords.txt");
 	printf("resultado de documentos = %d\n",i);
-	invertedIndex* hola = createIndex("TestCollection.txt", w/*, code *statusCode*/);
+	invertedIndex* hola = createIndex("exp.txt", w/*, code *statusCode*/);
 	saveIndex(hola, id/*, code *statusCode*/);
 	
 	
