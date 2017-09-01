@@ -558,13 +558,14 @@ void insertTerm(invertedIndex* InvertedIndex,char* word, document* newDoc){
 	newTerm->nxt=NULL;
 	
 	if(InvertedIndex->size == 0){
-		
+		printf("el size es 0\n");
 		InvertedIndex->terms = newTerm;
 		InvertedIndex->size = 1;
 		
 		
 	}
 	else{
+		printf("el size es distinto de 0\n");
 		term* aux = InvertedIndex->terms;
 		int i ;
 		for (i = 0; i < InvertedIndex->size-1; i++){
@@ -641,6 +642,7 @@ int searchTerm(char* word, invertedIndex* invertedIndex){
 	term* aux = invertedIndex->terms;
 	
 	while(aux != NULL){
+		printf("comparacion entre ---%s--- y ---%s---\n",word, aux->word );
 		if(strcmp(word, aux->word) == 0){
 			return TRUE;
 		}
@@ -988,7 +990,7 @@ invertedIndex* loadIndex(int id/*, code *statusCode*/){
 
 	//reserva de memoria para una lista de documentos.
 	inverted->docList = NULL;
-	int i,j;
+	
 	int* d = (int*)malloc(sizeof(int));
 	char Read[100];
 	sprintf(Read,"%d.id",id);
@@ -1003,29 +1005,41 @@ invertedIndex* loadIndex(int id/*, code *statusCode*/){
 		return 0;
 	}
 	char* word=(char*)malloc(sizeof(char*)*MAX_CHARACTER);
+	fscanf(pt,"%[^\n] ",Read);
 
 	while(strcmp("-----", word) != 0){
-		
-		
+		char* word=(char*)malloc(sizeof(char*)*MAX_CHARACTER);
+		int i,j;
 		fscanf(pt,"%s",word);
-		
-		while(TRUE){
-			
-			fscanf(pt,"%d-%d",&i,&j);
-			printf("palabra agregada ____ %s ____\n",word);
-			printf("agregada a : %d-%d \n",i,j);
-
-			if(i==0 && j == 0){
-
-				break;
-			}
-			insertDataIndex(inverted,word,i,j);
-
+		if (strcmp("-----", word) == 0)
+		{
+			break;
 		}
+		
+		do{
+			
+			
+				
+				printf("woord leido :%s\n",word );
+				fscanf(pt,"%d-%d ",&i,&j);
+				printf("quede aca I = %d, J= %d\n",i,j);
+				
+				if (i !=0 && j != 0)
+				{
+					insertDataIndex(inverted,word,i,j);
+					//printf("agregada a : %d-%d \n",i,j);
+					
+				}
+				//printf("quede aca I = %d, J= %d\n",i,j);
+				
+			
+		}
+		while(i != 0 || j !=0);
 		
 		
 
 	}
+	
 	fclose(pt);
 	saveIndex(inverted, d/*, code *statusCode*/);
 	return inverted;
@@ -1035,9 +1049,9 @@ invertedIndex* loadIndex(int id/*, code *statusCode*/){
 }
 
 void insertDataIndex(invertedIndex* index,char* word, int doc, int frecuency){
-
+	printf("palagra consultada : %s\n",word);
 	if(searchTerm(word,index)==TRUE){
-		//printf("repetido\n");
+		printf("---esta presente en el index---\n");
 		term* aux = getTerm(word,index);
 		//printf("repetido, en otro documento\n");
 						
@@ -1050,13 +1064,14 @@ void insertDataIndex(invertedIndex* index,char* word, int doc, int frecuency){
 
 	}
 	else{
-				
+		printf("---no esta presente en el index---\n");	
 		document* newDoc = (document*)malloc(sizeof(document));
 		newDoc->doc = doc;
 		newDoc->frecuency =frecuency;
 		newDoc->nxt = NULL;
 				
 		insertTerm(index,word,newDoc);
+		printf("se ha insertado\n");
 
 	}
 	
@@ -1124,13 +1139,13 @@ int numberLock(char* word,int lock){
 //invertedIndex* loadIndex(int id/*, code *statusCode*/)
 
 int main(){
-	int* id = (int*)malloc(sizeof(int));
-	int i= documentCont("TestCollection.txt");
-	StopWords* w = loadStopWords("StopWords.txt");
-	printf("resultado de documentos = %d\n",i);
-	invertedIndex* hola = createIndex("TestCollection.txt", w/*, code *statusCode*/);
-	saveIndex(hola, id/*, code *statusCode*/);
-	invertedIndex* new =loadIndex(*id/*, code *statusCode*/);
+	//int* id = (int*)malloc(sizeof(int));
+	//int i= documentCont("hola.txt");
+	//StopWords* w = loadStopWords("StopWords.txt");
+	//printf("resultado de documentos = %d\n",i);
+	//invertedIndex* hola = createIndex("hola.txt", w/*, code *statusCode*/);
+	//saveIndex(hola, id/*, code *statusCode*/);
+	invertedIndex* new =loadIndex(370/*, code *statusCode*/);
 	
 	
 	
