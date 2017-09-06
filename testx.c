@@ -62,16 +62,17 @@ typedef struct rst{
 
 }result;
 
-typedef struct rk
-{
+typedef struct {
 	char** query;
 	int size;
+	document* accumulated;
 	result* resultList;
-};
+	doc_data* dataDoc;
+}Ranking;
 
 
 
-enum code {OK, ERR_FILE_NOT_FOUND, ERR_FILE_NOT_PERM};
+typedef enum code {OK, ERR_FILE_NOT_FOUND, ERR_FILE_NOT_PERM} Code;
 
 
 //cabeceras
@@ -101,7 +102,12 @@ void insertWordsinDataDoc(words* docData,char* word);
 void getDocumentData(Index* inverted,char* pathDocumentsFile);
 Index* loadIndex(int id/*, code *statusCode*/);
 void insertDataIndex(Index* index,char* word, int doc, int frecuency);
-void insertRkgData(result* rk, document* doc, int frec,char* word);
+void insertRkgData(Ranking* rk, document* doc, int frec,char* word);
+void addDocumentDatas(document* current,int ID,int frec);
+void insertAccumulatedDocList(Ranking* rk,document* dc);
+void printDocuments(document* current);
+int searchDoc(document* current,int ID);
+document* getdocument(document* current,int ID);
 
 /*
 
@@ -210,26 +216,26 @@ Index* createIndex(char* pathDocumentsFile, StopWords *sw/*, code *statusCode*/)
 
 		
 
-		char* word2=(char*)malloc(sizeof(char*)*MAX_CHARACTER);
-		fscanf(pt,"%s",word2);
+		//char* word2=(char*)malloc(sizeof(char*)*MAX_CHARACTER);
+		fscanf(pt,"%s",word);
 		
-		lock = numberLock(word2,lock);
+		lock = numberLock(word,lock);
 		
 		
 		
-		if (strcmp(TITLE_TEXT, word2) != 0 && 
-			strcmp(INDEX_TEXT, word2) != 0 && 
-			strcmp(AUTHOR_TEXT, word2) != 0 && 
-			strcmp(BIBLIOGRAFY, word2) != 0 &&
-			strcmp(".w", word2) != 0)
+		if (strcmp(TITLE_TEXT, word) != 0 && 
+			strcmp(INDEX_TEXT, word) != 0 && 
+			strcmp(AUTHOR_TEXT, word) != 0 && 
+			strcmp(BIBLIOGRAFY, word) != 0 &&
+			strcmp(".w", word) != 0)
 		{
-			while(serchEspecialCharacter(word2) == TRUE){
-				word2 = cleanEspecilCharacter(word2);
+			while(serchEspecialCharacter(word) == TRUE){
+				word = cleanEspecilCharacter(word);
 			
 			}
-			if (strlen(word2)>1)
+			if (strlen(word)>1)
 			{
-				insertWordinList(inverted, word2, numberDoc,sw);
+				insertWordinList(inverted, word, numberDoc,sw);
 			}
 			
 	
@@ -278,12 +284,6 @@ void insertWordsinDataDoc(words* docData,char* word){
 			
 
 	}
-		
-			
-	
-	
-
-
 }
 
 void insertDatainInverted(Index* Index, doc_data* document){
@@ -360,15 +360,15 @@ void getDocumentData(Index* inverted,char* pathDocumentsFile){
 
 			aux->index = numberDoc;
 		}
-		fscanf(pt,"%s",word);
 		
-		lock = numberLock(word,lock);
+		printf("lock activado: %d\n",lock );
 		i=0;
 		while(lock == 2){
-		
+			printf("elemento activado : %s\n",word);
 			
 			char* word=(char*)malloc(sizeof(char*)*MAX_CHARACTER);
 			fscanf(pt,"%s",word);
+
 			lock = numberLock(word,lock);
 			if (strcmp(TITLE_TEXT, word) != 0 && 
 				strcmp(INDEX_TEXT, word) != 0 && 
@@ -377,6 +377,7 @@ void getDocumentData(Index* inverted,char* pathDocumentsFile){
 				strcmp(".W", word) != 0)
 			{
 				aux->title[i]=word;
+
 				
 				i++;
 			}
@@ -440,6 +441,9 @@ void getDocumentData(Index* inverted,char* pathDocumentsFile){
 			insertDatainInverted(inverted,aux);
 			
 		}
+		fscanf(pt,"%s",word);
+		
+		lock = numberLock(word,lock);
 
 	
 		
@@ -506,15 +510,10 @@ void insertTerm(Index* Index,char* word, document* newDoc){
 
 void insertWordinList(Index* inverted, char* word, int numberDoc, StopWords* sw){
 		
-
-		
-
 		wordToLower(word);
 		
 		if(searchStopWords(word,sw)==FALSE){
 
-			
-			
 				
 			if(searchTerm(word,inverted)==TRUE){
 			
@@ -675,23 +674,40 @@ void printDocumentData(doc_data* document){
 	doc_data* docAux = document;
 	int i;
 
-	if (docAux == NULL)
-	{
-		printf("el documento siguiente es nulo\n");
-	}
-	while(docAux != NULL){
+	printf("ID del documento: %d\n\n",document->index);
 
-		
+		printf("Titulo :\n");
 		char** aux = docAux->title;
 		i=0;
 		while(strcmp("-----", aux[i]) != 0)
 		{
-			printf("%s\n",aux[i]);
+			printf("%s ",aux[i]);
 			i++;
 		}
-		docAux = docAux->nxt;
+		printf("\n");
+		
+		printf("Autor :\n");
+		char** aux2 = docAux->author;
+		i=0;
+		while(strcmp("-----", aux2[i]) != 0)
+		{
+			printf("%s",aux2[i]);
+			i++;
+		}
+		printf("\n");
+		
+		printf("Bibliografia : \n");
+		char** aux3 = docAux->bibliografy;
+		i=0;
+		while(strcmp("-----", aux3[i]) != 0)
+		{
+			printf("%s",aux3[i]);
+			i++;
+		}
+		printf("\n");
+		
+		printf("*******************************************************************\n");
 
-	}
 
 }
 
@@ -908,40 +924,239 @@ void saveIndex(Index* i, int* id/*, code *statusCode*/){
 	
 
 }
-result* query(Index *i, StopWords *sw, char* text/*, code *statusCode*/){
+void burbbleSortDocument(document* new){
+
+     document *current , *next;
+     int t;
+     
+     current = new;
+     while(current->nxt != NULL)
+     {
+          next = current->nxt;
+          
+          while(next!=NULL)
+          {
+               if(current->frecuency < next->frecuency)
+               {
+                    t = next->frecuency;
+                    next->frecuency = current->frecuency;
+                    current->frecuency = t;          
+               }
+               next = next->nxt;                    
+          }    
+          current = current->nxt;
+          next = current->nxt;
+           
+     }
+     
+     
+
+
+}
+doc_data* getCurrentData(Ranking* current,int id_doc){
+
+	doc_data* aux = current-> dataDoc;
+	while(aux != NULL){
+		if (aux->index == id_doc)
+		{
+			return aux;
+		}
+		aux=aux->nxt;
+	}
+	return NULL;
+}
+
+int getDocumentAmount(document* current){
+	int amount=0;
+
+	document* aux = current;
+	while(aux != NULL){
+		amount++;
+		aux=aux->nxt;
+	}
+	return amount;
+}
+
+void displayResults(Ranking *r, int TopK/*, code *statusCode*/){
+	
+	int i;
+	if (TopK > getDocumentAmount(r->accumulated))
+	{
+		printf("La cantidad de respuestas pedidas es mayor a la cantidad de respuestas existentes.\n");
+	}
+	else{
+		printf("Resultados encontrados :\n");
+		document* aux = r->accumulated;
+		for (i = 0; i < TopK; i++)
+		{
+			doc_data* current = getCurrentData(r,aux->doc);
+			printDocumentData(current);
+			aux=aux->nxt;
+		}
+	}
+
+}
+
+Ranking* query(Index *i, StopWords *sw, char* text/*, code *statusCode*/){
 	char new[strlen(text)];
 	strcpy(new,text);
 	char* buffer = NULL;
     buffer = strtok(new," ");
 
-    result* rk = NULL;
+    Ranking* rk = (Ranking*)malloc(sizeof(Ranking));
+    rk->query=NULL;
+    rk->size=0;
+    rk->accumulated=NULL;
+    rk->resultList=NULL;
+    rk->dataDoc=i->docList;
+
+
+    int result_size=0;
+    //result* rst = NULL;
     int frecuency;
+    int j=0;
     
+    rk->query= (char**)malloc(sizeof(char*)*MAX_CHARACTER);
+
 
     while( buffer != NULL ) {
-        printf( "buffer : %s \n", buffer);
-       
-        term* aux = getTerm(buffer,i);
-        if (aux != NULL)
-        {
-        	document* doc = aux->documents;
-        	frecuency=0;
-        	while(doc != NULL){
-        		frecuency = frecuency + doc->frecuency;
-        		doc = doc->nxt;
-        	}
-        	insertRkgData(rk,aux->documents,frecuency,buffer);
-        	printf("se ha insertado %s, fre : %d\n",buffer,frecuency );
 
-        	
-        }
+    	if (searchStopWords(buffer,sw)==FALSE)
+    	{
+	    		
+	    	
+	        printf( "buffer : %s \n", buffer);
+	        result_size++;
+	        term* aux = getTerm(buffer,i);
+	        rk->query[j] = (char*)malloc(sizeof(char)*MAX_CHARACTER);
+	        rk->query[j]=buffer;
+	        if (aux != NULL)
+	        {
+	        	document* doc = aux->documents;
+	        	frecuency=0;
+	        	while(doc != NULL){
+	        		frecuency = frecuency + doc->frecuency;
+	        		doc = doc->nxt;
+	        	}
+	        	insertRkgData(rk,aux->documents,frecuency,buffer);
+	        	printDocuments(aux->documents);
+	        	insertAccumulatedDocList(rk,aux->documents);
+	        	
+	        	printf("se ha insertado %s, fre : %d\n",buffer,frecuency );
+
+    			
+
+	        	j++;
+	        }
+	        
+	     }
          buffer = strtok( NULL, " ");
+         //printf("palabra : %s\n",rk->query[j]);
+         
+
     }
+   
+    printf("hola\n");
+    rk->size=j;
+    printf("elemento : %d\n",rk->size );
+   	burbbleSortDocument(rk->accumulated);
+   	printDocuments(rk->accumulated);
+
+
+
     return rk;
 
 }
+void insertAccumulatedDocList(Ranking* rk,document* current){
 
-void insertRkgData(result* rk, document* doc, int frec,char* word){
+	if (rk->accumulated == NULL)
+	{
+		rk->accumulated = current;
+		printf("current insertado al inicio\n");
+	}
+	else
+	{
+		document* aux = current;
+		while(aux != NULL){
+			printf("documento y frecuencia agregada -> %d, %d\n",aux->doc,aux->frecuency );
+			addDocumentDatas(rk->accumulated,aux->doc,aux->frecuency);
+			aux=aux->nxt;
+		}
+	}
+	
+
+}
+void addDocumentDatas(document* current,int ID,int frec){
+
+	document* new = (document*)malloc(sizeof(document));
+	new->doc=ID;
+	new->frecuency=frec;
+	new->nxt=NULL;
+	printf("documento entrate para ser clasificado %d\n",ID );
+
+	if (searchDoc(current,ID)==TRUE)
+	{
+		printf("se ha encontrado el documento: %d\n",ID );
+		document* temp = getdocument(current,ID);
+		temp->frecuency= temp->frecuency+frec;
+		printf("frecuencia del doc %d aumentada a %d\n",temp->doc,temp->frecuency );
+	}
+	else{
+		
+		document* aux = current;
+
+		if (aux == NULL)
+		{
+			aux=new;
+		}
+		else{
+			while(aux->nxt != NULL){
+				printf("pasamos por el documento -----> %d\n",aux->doc );
+				aux = aux->nxt;
+			}
+			aux->nxt=new;
+			printf("documento agregado al final %d\n",aux->doc );
+		}
+
+
+	}
+
+
+}
+int searchDoc(document* current,int ID){
+
+	document* aux =current;
+	while(aux != NULL){
+		if (aux->doc==ID)
+		{
+			return TRUE;
+		}
+		aux=aux->nxt;
+	}
+	return FALSE;
+}
+document* getdocument(document* current,int ID){
+
+	document* aux =current;
+	while(aux != NULL){
+		if (aux->doc==ID)
+		{
+			return aux;
+		}
+		aux=aux->nxt;
+	}
+	return NULL;
+}
+
+void printDocuments(document* current){
+
+	document* aux = current;
+	while(aux!=NULL){
+		printf("documento : %d --- frecuencia: %d\n",aux->doc,aux->frecuency );
+		aux=aux->nxt;
+	}
+}
+void insertRkgData(Ranking* rk, document* doc, int frec,char* word){
 
 	result* new = (result*)malloc(sizeof(result));
 	new->word = word;
@@ -949,15 +1164,17 @@ void insertRkgData(result* rk, document* doc, int frec,char* word){
 	new->docList=doc;
 	new->nxt = NULL;
 
-	if (rk == NULL)
+	if (rk->resultList == NULL)
 	{
-		rk=new;
+		rk->resultList=new;
+		printf("elemento nulo\n");
 	}
 	else{
-		result* aux = rk;
+		result* aux = rk->resultList;
 		while(aux != NULL){
 			aux=aux->nxt;
 		}
+		printf("elemento agregado\n");
 		aux = new;
 	}
 
@@ -1126,7 +1343,9 @@ int main(){
 	Index* hola = createIndex("TestCollection.txt", w/*, code *statusCode*/);
 	saveIndex(hola, id/*, code *statusCode*/);
 	//Index* new =loadIndex(370/*, code *statusCode*/);
-	query(hola,w,"experimental investigation");
+	Ranking* rk = query(hola,w,"experimental a investigation are obtained flow");
+
+	displayResults(rk,3);
 	
 	
 	//TestCollection.txt
