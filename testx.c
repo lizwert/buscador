@@ -150,7 +150,7 @@ StopWords* loadStopWords(char* pathStopWordsFile /*, code *statusCode*/){
 		addInListSW(listSW,word);
 		
 	}
-	printf("cantidad de stopWords: %d \n",listSW->size);
+	
 
 	fclose(pt);
 	return listSW;
@@ -253,9 +253,7 @@ Index* createIndex(char* pathDocumentsFile, StopWords *sw/*, code *statusCode*/)
 	fclose(pt);
 	getDocumentData(inverted,pathDocumentsFile);
 	
-	//printDocumentData(inverted->docList);
-	//inverted->docList = first;
-	//printIndex(inverted);
+	
 	return inverted;
 	
 
@@ -335,12 +333,12 @@ void getDocumentData(Index* inverted,char* pathDocumentsFile){
 	while(!feof(pt)){
 		doc_data* aux = (doc_data*)malloc(sizeof(doc_data));
 		aux->index = 0;
-		aux->title = (char**)malloc(sizeof(char*)*400);
-		aux->author = (char**)malloc(sizeof(char*)*400);
-		aux->bibliografy = (char**)malloc(sizeof(char*)*400);		
+		aux->title = (char**)malloc(sizeof(char*)*MAX_CHARACTER*10);
+		aux->author = (char**)malloc(sizeof(char*)*MAX_CHARACTER*10);
+		aux->bibliografy = (char**)malloc(sizeof(char*)*MAX_CHARACTER*10);		
 		aux->nxt=NULL;
 
-		for (i = 0; i < 400; i++)
+		for (i = 0; i < MAX_CHARACTER*10; i++)
 		{
 			aux->title[i] = "-----";
 			aux->author[i] = "-----";
@@ -360,11 +358,12 @@ void getDocumentData(Index* inverted,char* pathDocumentsFile){
 
 			aux->index = numberDoc;
 		}
+
 		
-		printf("lock activado: %d\n",lock );
+		
 		i=0;
 		while(lock == 2){
-			printf("elemento activado : %s\n",word);
+			
 			
 			char* word=(char*)malloc(sizeof(char*)*MAX_CHARACTER);
 			fscanf(pt,"%s",word);
@@ -385,7 +384,7 @@ void getDocumentData(Index* inverted,char* pathDocumentsFile){
 			if(feof(pt)){
 				break;
 			}
-			//insertWordsinDataDoc(aux->title,word);
+			
 			
 
 		}
@@ -441,15 +440,16 @@ void getDocumentData(Index* inverted,char* pathDocumentsFile){
 			insertDatainInverted(inverted,aux);
 			
 		}
+
+
 		fscanf(pt,"%s",word);
 		
 		lock = numberLock(word,lock);
-
 	
 		
 	}
 	fclose(pt);
-	printDocumentData(inverted->docList);
+	
 }
 
 int searchDocData(Index* Index, doc_data* document){
@@ -623,7 +623,7 @@ int documentCont(char* file){
 
 			cont++;
 			
-			//buffer=NULL;
+			
 		}
 	}
 	
@@ -673,7 +673,7 @@ void printDocumentData(doc_data* document){
 
 	doc_data* docAux = document;
 	int i;
-
+	printf("***************************Inicio**************************\n\n\n");
 	printf("ID del documento: %d\n\n",document->index);
 
 		printf("Titulo :\n");
@@ -684,29 +684,29 @@ void printDocumentData(doc_data* document){
 			printf("%s ",aux[i]);
 			i++;
 		}
-		printf("\n");
+		printf("\n\n");
 		
 		printf("Autor :\n");
 		char** aux2 = docAux->author;
 		i=0;
 		while(strcmp("-----", aux2[i]) != 0)
 		{
-			printf("%s",aux2[i]);
+			printf("%s ",aux2[i]);
 			i++;
 		}
-		printf("\n");
+		printf("\n\n");
 		
 		printf("Bibliografia : \n");
 		char** aux3 = docAux->bibliografy;
 		i=0;
 		while(strcmp("-----", aux3[i]) != 0)
 		{
-			printf("%s",aux3[i]);
+			printf("%s ",aux3[i]);
 			i++;
 		}
-		printf("\n");
+		printf("\n\n");
 		
-		printf("*******************************************************************\n");
+		printf("*********************************Final****************************\n\n\n");
 
 
 }
@@ -926,30 +926,31 @@ void saveIndex(Index* i, int* id/*, code *statusCode*/){
 }
 void burbbleSortDocument(document* new){
 
-     document *current , *next;
-     int t;
-     
-     current = new;
-     while(current->nxt != NULL)
-     {
-          next = current->nxt;
-          
-          while(next!=NULL)
-          {
-               if(current->frecuency < next->frecuency)
-               {
-                    t = next->frecuency;
-                    next->frecuency = current->frecuency;
-                    current->frecuency = t;          
-               }
-               next = next->nxt;                    
-          }    
-          current = current->nxt;
-          next = current->nxt;
-           
-     }
-     
-     
+	if (new != NULL)
+	{
+		document *current , *next;
+	     int t;
+	     
+	     current = new;
+	     while(current->nxt != NULL)
+	     {
+	          next = current->nxt;
+	          
+	          while(next!=NULL)
+	          {
+	               if(current->frecuency < next->frecuency)
+	               {
+	                    t = next->frecuency;
+	                    next->frecuency = current->frecuency;
+	                    current->frecuency = t;          
+	               }
+	               next = next->nxt;                    
+	          }    
+	          current = current->nxt;
+	          next = current->nxt;
+	           
+	     }
+	}
 
 
 }
@@ -980,20 +981,27 @@ int getDocumentAmount(document* current){
 void displayResults(Ranking *r, int TopK/*, code *statusCode*/){
 	
 	int i;
-	if (TopK > getDocumentAmount(r->accumulated))
+	if (r->accumulated == NULL)
 	{
-		printf("La cantidad de respuestas pedidas es mayor a la cantidad de respuestas existentes.\n");
+		printf("No se han encontrado resultados para la consulta hecha\n");
 	}
 	else{
-		printf("Resultados encontrados :\n");
-		document* aux = r->accumulated;
-		for (i = 0; i < TopK; i++)
+		if (TopK > getDocumentAmount(r->accumulated))
 		{
-			doc_data* current = getCurrentData(r,aux->doc);
-			printDocumentData(current);
-			aux=aux->nxt;
+			printf("La cantidad de respuestas pedidas es mayor a la cantidad de respuestas existentes.\n");
+		}
+		else{
+			printf("Resultados encontrados :\n");
+			document* aux = r->accumulated;
+			for (i = 0; i < TopK; i++)
+			{
+				doc_data* current = getCurrentData(r,aux->doc);
+				printDocumentData(current);
+				aux=aux->nxt;
+			}
 		}
 	}
+	
 
 }
 
@@ -1025,7 +1033,7 @@ Ranking* query(Index *i, StopWords *sw, char* text/*, code *statusCode*/){
     	{
 	    		
 	    	
-	        printf( "buffer : %s \n", buffer);
+	        
 	        result_size++;
 	        term* aux = getTerm(buffer,i);
 	        rk->query[j] = (char*)malloc(sizeof(char)*MAX_CHARACTER);
@@ -1042,7 +1050,7 @@ Ranking* query(Index *i, StopWords *sw, char* text/*, code *statusCode*/){
 	        	printDocuments(aux->documents);
 	        	insertAccumulatedDocList(rk,aux->documents);
 	        	
-	        	printf("se ha insertado %s, fre : %d\n",buffer,frecuency );
+	        	
 
     			
 
@@ -1051,14 +1059,14 @@ Ranking* query(Index *i, StopWords *sw, char* text/*, code *statusCode*/){
 	        
 	     }
          buffer = strtok( NULL, " ");
-         //printf("palabra : %s\n",rk->query[j]);
+         
          
 
     }
    
-    printf("hola\n");
+    
     rk->size=j;
-    printf("elemento : %d\n",rk->size );
+    
    	burbbleSortDocument(rk->accumulated);
    	printDocuments(rk->accumulated);
 
@@ -1072,13 +1080,13 @@ void insertAccumulatedDocList(Ranking* rk,document* current){
 	if (rk->accumulated == NULL)
 	{
 		rk->accumulated = current;
-		printf("current insertado al inicio\n");
+		
 	}
 	else
 	{
 		document* aux = current;
 		while(aux != NULL){
-			printf("documento y frecuencia agregada -> %d, %d\n",aux->doc,aux->frecuency );
+			
 			addDocumentDatas(rk->accumulated,aux->doc,aux->frecuency);
 			aux=aux->nxt;
 		}
@@ -1092,14 +1100,14 @@ void addDocumentDatas(document* current,int ID,int frec){
 	new->doc=ID;
 	new->frecuency=frec;
 	new->nxt=NULL;
-	printf("documento entrate para ser clasificado %d\n",ID );
+	
 
 	if (searchDoc(current,ID)==TRUE)
 	{
-		printf("se ha encontrado el documento: %d\n",ID );
+		
 		document* temp = getdocument(current,ID);
 		temp->frecuency= temp->frecuency+frec;
-		printf("frecuencia del doc %d aumentada a %d\n",temp->doc,temp->frecuency );
+		
 	}
 	else{
 		
@@ -1111,11 +1119,11 @@ void addDocumentDatas(document* current,int ID,int frec){
 		}
 		else{
 			while(aux->nxt != NULL){
-				printf("pasamos por el documento -----> %d\n",aux->doc );
+				
 				aux = aux->nxt;
 			}
 			aux->nxt=new;
-			printf("documento agregado al final %d\n",aux->doc );
+			
 		}
 
 
@@ -1152,7 +1160,7 @@ void printDocuments(document* current){
 
 	document* aux = current;
 	while(aux!=NULL){
-		printf("documento : %d --- frecuencia: %d\n",aux->doc,aux->frecuency );
+		
 		aux=aux->nxt;
 	}
 }
@@ -1167,14 +1175,14 @@ void insertRkgData(Ranking* rk, document* doc, int frec,char* word){
 	if (rk->resultList == NULL)
 	{
 		rk->resultList=new;
-		printf("elemento nulo\n");
+		
 	}
 	else{
 		result* aux = rk->resultList;
 		while(aux != NULL){
 			aux=aux->nxt;
 		}
-		printf("elemento agregado\n");
+		
 		aux = new;
 	}
 
@@ -1219,17 +1227,17 @@ Index* loadIndex(int id/*, code *statusCode*/){
 		
 		do{
 
-			printf("woord leido :%s\n",word );
+			
 			fscanf(pt,"%d-%d ",&i,&j);
-			printf("quede aca I = %d, J= %d\n",i,j);
+			
 			
 			if (i !=0 && j != 0)
 			{
 				insertDataIndex(inverted,word,i,j);
-				//printf("agregada a : %d-%d \n",i,j);
+				
 
 			}
-			//printf("quede aca I = %d, J= %d\n",i,j);
+			
 				
 			
 		}
@@ -1246,11 +1254,11 @@ Index* loadIndex(int id/*, code *statusCode*/){
 }
 
 void insertDataIndex(Index* index,char* word, int doc, int frecuency){
-	printf("palagra consultada : %s\n",word);
+	
 	if(searchTerm(word,index)==TRUE){
-		printf("---esta presente en el index---\n");
+		
 		term* aux = getTerm(word,index);
-		//printf("repetido, en otro documento\n");
+		
 						
 		document* newDoc = (document*)malloc(sizeof(document));
 		newDoc->doc=doc;
@@ -1261,14 +1269,14 @@ void insertDataIndex(Index* index,char* word, int doc, int frecuency){
 
 	}
 	else{
-		printf("---no esta presente en el index---\n");	
+		
 		document* newDoc = (document*)malloc(sizeof(document));
 		newDoc->doc = doc;
 		newDoc->frecuency =frecuency;
 		newDoc->nxt = NULL;
 				
 		insertTerm(index,word,newDoc);
-		printf("se ha insertado\n");
+		
 
 	}
 	
@@ -1343,9 +1351,36 @@ int main(){
 	Index* hola = createIndex("TestCollection.txt", w/*, code *statusCode*/);
 	saveIndex(hola, id/*, code *statusCode*/);
 	//Index* new =loadIndex(370/*, code *statusCode*/);
-	Ranking* rk = query(hola,w,"experimental a investigation are obtained flow");
+	Ranking* rk = query(hola,w,"test 12");
 
 	displayResults(rk,3);
+
+
+
+	printf("\n\n");
+	printf("por favor selecione una de las siguientes opciones.\n" );
+
+	    printf("	--------------------------------------------------- \n");
+		printf("	|    N° opcion     |    accion                    |\n ");
+		printf("	--------------------------------------------------\n");
+		printf("	|		   |                              |\n");
+		printf("	|	 1	   |    Cargar StopWord           |\n");
+		printf("	|		   |                              |\n");
+		printf("	|	 2	   |    Crear indice invertido    |\n");
+		printf("	|		   |                              |\n");
+		printf("	|	 3	   |    Guardar indice invertido  |\n");
+		printf("	|		   |                              |\n");
+		printf("	|	 4	   |    Cargar indice invertido   |\n");
+		printf("	|		   |                              |\n");
+		printf("	|	 5	   |    Hacer Consulta            |\n");
+		printf("	|		   |                              |\n");
+		printf("	|	 6	   |    Ayuda                     |\n");
+		printf("	|		   |                              |\n");
+		printf("	|	 7	   |    Salir                     |\n");
+		printf("	|		   |                              |\n");
+		printf("	---------------------------------------------------\n\n");
+
+
 	
 	
 	//TestCollection.txt

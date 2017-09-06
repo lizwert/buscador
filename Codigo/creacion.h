@@ -1,0 +1,11 @@
+Board* createBoard(int N, int M, Params params,code *statusCode);
+void Print(Board * board,code *statusCode);
+char* DateHour();
+Board* loadBoard(int id,code *statusCode);
+void saveBoard(Board *b, int *id,code *statusCode);
+Position *checkCandies(Board * b, code *statusCode);
+void imprimir_areglo_igual(Position* arreglo);
+int esta_posicion(Position* arreglo,int largo, Position actual);
+int adyacente(Position actual, Position destino);
+int play(Board *b, Position pOri, Position pDes, int *turnos, code *statusCode);
+Params generarParams(int dificultad,int N,int M);

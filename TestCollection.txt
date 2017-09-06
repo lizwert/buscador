@@ -2706,16 +2706,6 @@ calculated, and the spar cap temperature is assumed to be a function
 of both space and time .  graphs of temperature and thermal
 stress distributions are presented, and the results are compared
 with those of reference 1 .
-.I 96
-.T
-review of published data on the effect of roughness on transition from
-laminar to turbulent flow .
-.A
-with the aid of this concept, a large number of flow problems is
-shown to be basically similar, such as boundary-layer
-shockwave interaction, wake flow behind blunt-based bodies (base
-pressure problem), flow separation in overexpanded supersonic
-nozzles, separation on wings and bodies, etc .
 .I 98
 .T
 heat transfer by laminar flow to a rotating plate .
