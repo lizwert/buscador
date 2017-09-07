@@ -35,16 +35,15 @@ void displayWelcome(){
 	printf("********************\n");
 	printf("*  Menú Principal  *\n");
 	printf("********************\n");
-	
+	delay(2000);
 	
 }
 void displayMainMenu(){
 
-	delay(2000);
 	printf("\n\n");
 	printf("-Por favor seleccione una de las siguientes opciones.\n\n" );
 
-	    	printf("	--------------------------------------------------- \n");
+	    printf("	--------------------------------------------------- \n");
 		printf("	|    N° opcion     |    accion                    |\n ");
 		printf("	--------------------------------------------------\n");
 		printf("	|		   |                              |\n");
@@ -82,9 +81,8 @@ int getMainOption(){
 	if (i > 7 || i < 1 || i == -5)
 	{
 		while(getchar()!='\n');
-		system("clear");
-		displayErrorMsg();
 		displayMainMenu();
+		displayErrorMsg();
 		getMainOption();
 
 		
