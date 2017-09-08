@@ -50,6 +50,12 @@ StopWords* loadStopWords(char* pathStopWordsFile /*, code *statusCode*/){
 		addInListSW(listSW,word);
 		
 	}
+
+	printf("************************************\n");
+	printf("*        StopWords Cargados        *\n");
+	printf("************************************\n");
+	printf("*            ID: %i               *\n",listSW->size);
+	printf("************************************\n");
 	
 
 	fclose(pt);
@@ -102,17 +108,20 @@ SALIDA: un entero que representan valores booleanos TRUE(1), FALSE(0).
 
 */
 int searchStopWords(char* word, StopWords* sw){
+	if (sw != NULL)
+	{
+		words* aux = sw->listStopWords;
 	
-	words* aux = sw->listStopWords;
-	
-	while(aux !=NULL){
+		while(aux !=NULL){
 		
-		if(strcmp(word, aux->word) == 0){
+			if(strcmp(word, aux->word) == 0){
 			
-			return TRUE;
+				return TRUE;
 		}
-		aux=aux->nxt;
+			aux=aux->nxt;
 	
+		}
 	}
+
 	return FALSE;
 }
