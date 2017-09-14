@@ -19,13 +19,13 @@ SALIDA:  un puntero al indice invertido.
 
 */
 
-Index* createIndex(char* pathDocumentsFile, StopWords *sw/*, code *statusCode*/){
+Index* createIndex(char* pathDocumentsFile, StopWords *sw, Code *statusCode){
 
 	//se inicial el indice invertido con valores por defecto.
 	Index* inverted = (Index*)malloc(sizeof(Index));
 	inverted->size=0;
 	inverted->terms = NULL;
-	inverted->doc_size = documentCont(pathDocumentsFile);
+	inverted->doc_size = documentCont(pathDocumentsFile,statusCode);
 
 	//reserva de memoria para una lista de documentos.
 	inverted->docList = NULL;
@@ -35,11 +35,11 @@ Index* createIndex(char* pathDocumentsFile, StopWords *sw/*, code *statusCode*/)
 
 	FILE* pt = fopen(pathDocumentsFile,"rb");
 	if(pt){ 
-		/*statusCode = OK;*/
+		*statusCode = OK;
 		printf("abierto \n");
 	}
 	else{ 
-		/*statusCode = ERR_FILE_NOT_FOUND; */
+		*statusCode = ERR_FILE_NOT_FOUND; 
 		printf("No se pudo abrir el archivo \n");
 		return inverted;
 	}
@@ -89,6 +89,8 @@ Index* createIndex(char* pathDocumentsFile, StopWords *sw/*, code *statusCode*/)
 	}
 	fclose(pt);
 	getDocumentData(inverted,pathDocumentsFile);
+	*statusCode = OK;
+
 	
 	
 	return inverted;
@@ -103,17 +105,17 @@ ENTRADAS: un string correspondiente al nombre del archivo (o ubucacion de este).
 SALIDA:  La cantidad de documentos en File.
 
 */
-int documentCont(char* file){
+int documentCont(char* file, Code* statusCode){
 
 	char buffer[MAX_CHARACTER];
 	int cont=0;
 	FILE* pt = fopen(file,"rb");
 	if(pt){ 
-		/*statusCode = OK;*/
+		*statusCode = OK;
 		printf("abierto \n");
 	}
 	else{ 
-		/*statusCode = ERR_FILE_NOT_FOUND; */
+		*statusCode = ERR_FILE_NOT_FOUND; 
 		printf("No se pudo abrir el archivo \n");
 		return 0;
 	}
@@ -352,7 +354,7 @@ ENTRADAS: una estructura index, un entero pasdo por referencia para generarle un
 
 SALIDA: no contiene retorno, pero el index es guardado y el valor de ID es cambiado segun se haya generado. 
 */
-void saveIndex(Index* i, int* id/*, code *statusCode*/){
+void saveIndex(Index* i, int* id, Code *statusCode){
 	srand(time(0));
 	char nombre_archivo[100];
 	char* horario = DateHour();
@@ -363,17 +365,17 @@ void saveIndex(Index* i, int* id/*, code *statusCode*/){
 	{
 		(*id) = 100 + rand() % 900;
 		sprintf(nombre_archivo,"%d.id",*id);
-		//*statusCode = DIMENSIONS_NOT_ALLOWED;
+		
 
 	}
 	FILE* archivo = fopen(nombre_archivo,"w");
 
 	fprintf(archivo, "indice guardado el : %s\n",horario );
-	//*statusCode= OK;
+	*statusCode= OK;
 	term* aux= i->terms;
 	fprintf(archivo, "%d\n",i->size );
 	
-	for(j=0;j<i->size;j++){
+	while(aux != NULL){
 
 		fprintf(archivo,"%s ",aux->word);
 		document* doc = aux->documents;
@@ -427,6 +429,7 @@ void saveIndex(Index* i, int* id/*, code *statusCode*/){
 	}
 	printf("el valor del id es %d\n",*id);
 	fclose(archivo);
+	*statusCode = OK;
 }
 
 
@@ -438,7 +441,7 @@ ENTRADAS: un entero ID que representa el valor con el que se guardo el index.
 SALIDA: una estructura index con los datos cargados.
 */
 
-Index* loadIndex(int id/*, code *statusCode*/){
+Index* loadIndex(int id, Code *statusCode){
 
 	Index* inverted = (Index*)malloc(sizeof(Index));
 	inverted->size=0;
@@ -454,11 +457,11 @@ Index* loadIndex(int id/*, code *statusCode*/){
 	sprintf(Read,"%d.id",id);
 	FILE* pt = fopen(Read,"rb");
 	if(pt){ 
-		/*statusCode = OK;*/
+		*statusCode = OK;
 		printf("abierto \n");
 	}
 	else{ 
-		/*statusCode = ERR_FILE_NOT_FOUND; */
+		*statusCode = ERR_FILE_NOT_FOUND; 
 		printf("No se pudo abrir el archivo \n");
 		return 0;
 	}
@@ -470,6 +473,7 @@ Index* loadIndex(int id/*, code *statusCode*/){
 		char* word=(char*)malloc(sizeof(char*)*MAX_CHARACTER);
 		int i,j;
 		fscanf(pt,"%s",word);
+
 		if (strcmp("-----", word) == 0)
 		{
 			break;
@@ -483,7 +487,11 @@ Index* loadIndex(int id/*, code *statusCode*/){
 			
 			if (i !=0 && j != 0)
 			{
+
+				
 				insertDataIndex(inverted,word,i,j);
+
+
 				
 
 			}
@@ -495,8 +503,10 @@ Index* loadIndex(int id/*, code *statusCode*/){
 	}
 	
 	fclose(pt);
-	getDocumentData(inverted,Read);
-	saveIndex(inverted, d/*, code *statusCode*/);
+	getDocumentDataLoaded(inverted,Read);
+
+
+	
 	return inverted;
 }
 

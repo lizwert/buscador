@@ -53,6 +53,7 @@ SALIDA: no contiene retorno, pero los datos de documento es insertada en index.
 void insertDatainInverted(Index* Index, doc_data* document){
 	
 	if(searchDocData(Index , document) == FALSE){
+	
 
 		
 		if(Index->docList == NULL){
@@ -72,6 +73,7 @@ void insertDatainInverted(Index* Index, doc_data* document){
 		}
 
 	}
+
 }
 
 
@@ -89,22 +91,23 @@ void insertTerm(Index* Index,char* word, document* newDoc){
 	newTerm->documents = newDoc;
 	newTerm->nxt=NULL;
 	
-	if(Index->size == 0){
+	if(Index->terms == NULL){
 		
 		Index->terms = newTerm;
 		Index->size = 1;
+		
 		
 		
 	}
 	else{
 		
 		term* aux = Index->terms;
-		int i ;
-		for (i = 0; i < Index->size-1; i++){
+		while(aux->nxt != NULL){
 			aux = aux->nxt;
 		}
-		aux->nxt = newTerm;
+		aux->nxt= newTerm;
 		Index->size++;
+		
 
 	}	
 }
@@ -138,19 +141,23 @@ SALIDA: no contiene retorno, pero se inserta la lista en la estructura.
 
 void insertAccumulatedDocList(Ranking* rk,document* current){
 
+
 	if (rk->accumulated == NULL)
 	{
+		
 		rk->accumulated = current;
 		
 	}
 	else
 	{
+
 		document* aux = current;
 		while(aux != NULL){
 			
 			addDocumentDatas(rk->accumulated,aux->doc,aux->frecuency);
 			aux=aux->nxt;
 		}
+		
 	}
 }
 
@@ -180,24 +187,21 @@ void addDocumentDatas(document* current,int ID,int frec){
 		
 	}
 	else{
+	
 		
 		document* aux = current;
 
-		if (aux == NULL)
-		{
-			aux=new;
-		}
-		else{
-			while(aux->nxt != NULL){
+
+		while(aux->nxt != NULL){
 				
-				aux = aux->nxt;
-			}
-			aux->nxt=new;
+			aux = aux->nxt;
+		}
+		aux->nxt=new;
 			
 		}
 
 
-	}
+	
 }
 
 
@@ -241,6 +245,7 @@ SALIDA: no contiene retorno, pero se agrega un nuevo documento a Index.
 void insertDataIndex(Index* index,char* word, int doc, int frecuency){
 	
 	if(searchTerm(word,index)==TRUE){
+		
 		
 		term* aux = getTerm(word,index);
 		

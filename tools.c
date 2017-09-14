@@ -59,41 +59,46 @@ int searchTerm(char* word, Index* Index){
 void printDocumentData(doc_data* document){
 
 	doc_data* docAux = document;
-	int i;
-	printf("***************************Inicio**************************\n\n\n");
-	printf("ID del documento: %d\n\n",document->index);
+	if (docAux != NULL)
+	{
+		
+	
+		int i;
+		printf("***************************Inicio**************************\n\n\n");
+		printf("ID del documento: %d\n\n",document->index);
 
-		printf("Titulo :\n");
-		char** aux = docAux->title;
-		i=0;
-		while(strcmp("-----", aux[i]) != 0)
-		{
-			printf("%s ",aux[i]);
-			i++;
-		}
-		printf("\n\n");
-		
-		printf("Autor :\n");
-		char** aux2 = docAux->author;
-		i=0;
-		while(strcmp("-----", aux2[i]) != 0)
-		{
-			printf("%s ",aux2[i]);
-			i++;
-		}
-		printf("\n\n");
-		
-		printf("Bibliografia : \n");
-		char** aux3 = docAux->bibliografy;
-		i=0;
-		while(strcmp("-----", aux3[i]) != 0)
-		{
-			printf("%s ",aux3[i]);
-			i++;
-		}
-		printf("\n\n");
-		
-		printf("*********************************Final****************************\n\n\n");
+			printf("Titulo :\n");
+			char** aux = docAux->title;
+			i=0;
+			while(strcmp("-----", aux[i]) != 0)
+			{
+				printf("%s ",aux[i]);
+				i++;
+			}
+			printf("\n\n");
+			
+			printf("Autor :\n");
+			char** aux2 = docAux->author;
+			i=0;
+			while(strcmp("-----", aux2[i]) != 0)
+			{
+				printf("%s ",aux2[i]);
+				i++;
+			}
+			printf("\n\n");
+			
+			printf("Bibliografia : \n");
+			char** aux3 = docAux->bibliografy;
+			i=0;
+			while(strcmp("-----", aux3[i]) != 0)
+			{
+				printf("%s ",aux3[i]);
+				i++;
+			}
+			printf("\n\n");
+			
+			printf("*********************************Final****************************\n\n\n");
+	}
 }
 //Funcion que transforma los caracteres de una palabra a minusculas
 void wordToLower(char* word){
@@ -122,7 +127,7 @@ void burbbleSortDocument(document* new){
 	if (new != NULL)
 	{
 		document *current , *next;
-	     int t;
+	     int t,d;
 	     
 	     current = new;
 	     while(current->nxt != NULL)
@@ -133,9 +138,13 @@ void burbbleSortDocument(document* new){
 	          {
 	               if(current->frecuency < next->frecuency)
 	               {
+	               		
 	                    t = next->frecuency;
+	                    d = next->doc;
 	                    next->frecuency = current->frecuency;
-	                    current->frecuency = t;          
+	                    next->doc=current->doc;
+	                    current->frecuency = t;
+	                    current->doc=d;          
 	               }
 	               next = next->nxt;                    
 	          }    
@@ -144,6 +153,7 @@ void burbbleSortDocument(document* new){
 	           
 	     }
 	}
+
 }
 
 //Funcion booleana que busca un documento(dado su ID) en una lista de documentos.
@@ -160,11 +170,11 @@ int searchDoc(document* current,int ID){
 	return FALSE;
 }
 
-void printDocuments(document* current){
+void printDocuments(term* current){
 
-	document* aux = current;
+	term* aux = current;
 	while(aux!=NULL){
-		
+			printf("documento -> word : %s \n",aux->word );
 		aux=aux->nxt;
 	}
 }
@@ -177,17 +187,20 @@ ENTRADAS: una estructura Ranking y la cantidad de elementos a imprimir.
 
 SALIDA: no posee un retorno, solo imprime la cantidad de datos pedidos.
 */
-void displayResults(Ranking *r, int TopK/*, code *statusCode*/){
+void displayResults(Ranking *r, int TopK, Code *statusCode){
 	
 	int i;
 	if (r->accumulated == NULL)
 	{
 		printf("No se han encontrado resultados para la consulta hecha\n");
+		*statusCode = ERR_RESULT_NOT_FOUND;
 	}
 	else{
+	
 		if (TopK > getDocumentAmount(r->accumulated))
 		{
 			printf("La cantidad de respuestas pedidas es mayor a la cantidad de respuestas existentes.\n");
+			*statusCode = MISS_RESUT_AMOUNT;
 		}
 		else{
 			printf("Resultados encontrados :\n");
@@ -198,6 +211,7 @@ void displayResults(Ranking *r, int TopK/*, code *statusCode*/){
 				printDocumentData(current);
 				aux=aux->nxt;
 			}
+			*statusCode = OK;
 		}
 	}
 }
@@ -211,7 +225,7 @@ ENTRADAS: una estructura Index, una lista de StopWords y una consulta hecha por 
 SALIDA: retorna una estructura Ranking con toda la informacion necesaria para poder ser desplegada luego.
 */
 
-Ranking* query(Index *i, StopWords *sw, char* text/*, code *statusCode*/){
+Ranking* query(Index *i, StopWords *sw, char* text, Code *statusCode){
 	char new[strlen(text)];
 	strcpy(new,text);
 	char* buffer = NULL;
@@ -242,18 +256,20 @@ Ranking* query(Index *i, StopWords *sw, char* text/*, code *statusCode*/){
 	        
 	        result_size++;
 	        term* aux = getTerm(buffer,i);
+
 	        rk->query[j] = (char*)malloc(sizeof(char)*MAX_CHARACTER);
 	        rk->query[j]=buffer;
 	        if (aux != NULL)
 	        {
 	        	document* doc = aux->documents;
+	        	
 	        	frecuency=0;
 	        	while(doc != NULL){
 	        		frecuency = frecuency + doc->frecuency;
 	        		doc = doc->nxt;
 	        	}
 	        	insertRkgData(rk,aux->documents,frecuency,buffer);
-	        	printDocuments(aux->documents);
+	        	
 	        	insertAccumulatedDocList(rk,aux->documents);
 	        	
 	        	
@@ -274,7 +290,8 @@ Ranking* query(Index *i, StopWords *sw, char* text/*, code *statusCode*/){
     rk->size=j;
     
    	burbbleSortDocument(rk->accumulated);
-   	printDocuments(rk->accumulated);
+   	*statusCode = OK;
+   
 
 
 

@@ -19,7 +19,7 @@ SALIDA: un puntero a la estructura StopWords donde estan almacenadas las palabra
 
 */
 
-StopWords* loadStopWords(char* pathStopWordsFile /*, code *statusCode*/){
+StopWords* loadStopWords(char* pathStopWordsFile , Code *statusCode){
 
 
 	StopWords* listSW=(StopWords*)malloc(sizeof(StopWords));
@@ -32,11 +32,11 @@ StopWords* loadStopWords(char* pathStopWordsFile /*, code *statusCode*/){
 	
 	FILE* pt = fopen(pathStopWordsFile,"rb");
 	if(pt){ 
-		/*statusCode = OK;*/
+		*statusCode = OK;
 		printf("abierto \n");
 	}
 	else{ 
-		/*statusCode = ERR_FILE_NOT_FOUND; */
+		*statusCode = ERR_FILE_NOT_FOUND; 
 		printf("No se pudo abrir el archivo \n");
 		return NULL;
 	}

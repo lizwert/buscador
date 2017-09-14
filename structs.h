@@ -9,7 +9,7 @@
 #define FALSE 0
 
 
-typedef enum code {OK, ERR_FILE_NOT_FOUND, ERR_FILE_NOT_PERM} Code;
+typedef enum code {OK, ERR_FILE_NOT_FOUND, ERR_FILE_NOT_PERM,ERR_RESULT_NOT_FOUND,MISS_RESUT_AMOUNT} Code;
 
 typedef struct nodo {
  char* word;
@@ -69,3 +69,11 @@ typedef struct {
 	doc_data* dataDoc;
 }Ranking;
 
+typedef struct 
+{
+	Index* i;
+	StopWords* sw;
+	Ranking* rk;
+	char* Query;
+	Code* code;
+}menu;
