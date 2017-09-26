@@ -92,4 +92,5 @@
 ;################### Anexos ###################
 ;              *https://www.inf.utfsm.cl/~mcloud/iwi-253/apuntes/apunte04-03-04-2x.pdf
 ;              *https://www.campusmvp.es/recursos/post/Recursividad-de-cola-tail-recursion.aspx
+;              *http://sicp.ai.mit.edu/Fall-2004/manuals/scheme-7.5.5/doc/scheme_7.html
 
