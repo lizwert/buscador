@@ -67,10 +67,10 @@
    )
 )
 
-;Funcion Booleana que informa si exite un stopWprd en una lista de stopWords
+;Funcion Booleana que informa si exite un stopWord en una lista de stopWords
 ;ENTRADA: una lista de stopWords y un string para ser consultado
 ;SALIDA: #t o #f en caso afirmativo o negativo respectivamente.
-;RECURSION: 
+;RECURSION: cola
 (define searchStopWord
   (lambda (listStopWord stopWord)
     (if (null? listStopWord)
@@ -86,6 +86,8 @@
 
 
 
+(define hola '(#\h #\o #\l #\a #\space #\c #\o #\m #\o #\space #\e #\s #\t #\a #\s))
+(define chao "hola como estas")
 
 
 
@@ -93,4 +95,50 @@
 ;              *https://www.inf.utfsm.cl/~mcloud/iwi-253/apuntes/apunte04-03-04-2x.pdf
 ;              *https://www.campusmvp.es/recursos/post/Recursividad-de-cola-tail-recursion.aspx
 ;              *http://sicp.ai.mit.edu/Fall-2004/manuals/scheme-7.5.5/doc/scheme_7.html
+;              *http://www.dccia.ua.es/dccia/inf/asignaturas/LPP/2013-14/teoria/Tema03-ProgramacionFuncional.html#2-1
+
+
+
+
+
+
+;############################ Funciones auxiliares ############################
+
+;Funcion que retorna la primera palabra de una lista de caracteres.
+;ENTRADA: una lista de caracteres del siguiente formato '(#\h #\o #\l #\a) y una lista vacia.
+;SALIDA: la primera palabra que exista antes de un espacio o que la lista sea nula.
+;RECURSION: lineal
+(define (extractor stringList list)
+  (if (null? stringList)
+      (list->string (reverse list))
+      (if (char=? (car stringList )  #\space)
+          (list->string (reverse list))
+          (extractor (cdr stringList) (cons (car stringList ) list ))
+      )
+   )
+)
+;Funcion que remueve la primera palabra de una lista de caracteres
+;ENTRADA: una lista de caracteres del siguiente formato '(#\h #\o #\l #\)
+;SALIDA: el resto de la lista sin la primera palabra
+;RECURSION: cola
+(define (removeFirst stringList)
+  (if (null? stringList)
+      stringList
+      (if (char=? (car stringList )  #\space)
+          (cdr stringList)
+         (removeFirst (cdr stringList))
+      )
+   )
+)
+
+;Funcion que remueve la primera palabra de una lista de caracteres.
+;ENTRADA: una lista de caracteres del siguiente formato '(#\h #\o #\l #\a) y una lista vacia.
+;SALIDA: la primera palabra que exista antes de un espacio o que la lista sea nula.
+;RECURSION: lineal
+(define (separator stringList list)
+  (if (null? stringList)
+      list
+      (reverse (separator (removeFirst stringList) (cons (extractor stringList '()) list)))
+   )
+)
 
