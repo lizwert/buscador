@@ -69,14 +69,62 @@
 
 
 
-(define (createIndex documents stopWords)
-  (let ([termList (cleanStopWords stopWords (getAllTermList documents))]
-        [
+
+;(define (termQuery index term documents)
       
   
-      
-(define (getFrecuency word documents)
+(define (getTerm listTerm term)
+  (if (null? listTerm)
+      '()
+      (if (string=? (caar listTerm) term)
+          (car listTerm)
+          (getTerm (cdr listTerm) term)
+      )
+  )
+)
+  
+(define (getFrecuencyDocument word document)
+  (let ([TermList (createListTerm document '())])
+    (if (= (duplyCount TermList word) 0)
+        '()
+        (list (car document) (duplyCount TermList word))
+    )
+  )
+)
 
+(define (AllFrecuencyWord word documents)
+  (if (null? documents)
+      '()
+      (if (null? (getFrecuencyDocument word (car(cdr (car documents)))))
+          (AllFrecuencyWord word (cdr documents))
+          (cons (getFrecuencyDocument word (car(cdr (car documents))))
+            (AllFrecuencyWord word (cdr documents))
+          )
+      )
+      
+  )
+)
+
+
+(define (createFullTermList terms documents)
+  (if (null? terms)
+      '()
+      (cons (cons (car terms) (AllFrecuencyWord (car terms) documents))
+            (createFullTermList (cdr terms) documents)
+      )
+  )
+)
+
+        
+(define (duplyCount list element)
+  (if (null? list)
+      0
+      (if (equal? (car list) element)
+          (+ (duplyCount (cdr list) element) 1)
+          (duplyCount (cdr list) element)
+      )
+  )
+)
 
 
 (define (searchStringInList list string)
@@ -250,6 +298,11 @@
   )
 )
 
+(define (documentCleaner documents)
+  (deleteItem "." (duply (getAllTermList documents )))           
+)
+
+
 
 
 ;(map list->string (map (lambda (x) (wordsCleaner x OK)) (map string->list (duply (createListTerm (car(cdr(car A))) '())))))
@@ -261,92 +314,22 @@
 ;(trace searchStringInList)
 ;(repetidos (createListTerm (car(cdr(car A))) '()))
 
-(cleanStopWords B '("study"
+(define Y '("study"
   "propeller"
   "order"
   "determine"
   "spanwise"
   "distribution"
   "increase"
-  "angles"
-  "attack"
-  "and"
-  "at"
-  "free"
-  "stream"
-  "velocity"
-  "ratios"
-  "results"
-  "were"
-  "intended"
-  "as"
-  "basis"
-  "different"
-  "theoretical"
-  "treatments"
-  "problem"
-  "comparative"
-  "span"
-  "loading"
-  "curves"
-  "together"
-  "supporting"
-  "evidence"
-  "showed"
-  "that"
-  "substantial"
-  "part"
-  "increment"
-  "produced"
-  "by"
-  "due"
-  "destalling"
-  "or"
-  "boundary-layer-control"
-  "effect"
-  "integrated"
-  "remaining"
-  "lift"
-  "increment"
-  "after"
-  "subtracting"
-  "this"
-  "lift"
-  "found"
-  "to"
-  "agree"
-  "well"
-  "with"
-  "potential"
-  "flow"
-  "theory"
-  "an"
-  "empirical"
-  "evaluation"
-  "destalling"
-  "effects"
-  "was"
-  "made"
-  "for"
-  "specific"
-  "configuration"
-  "experiment"
-  "j"
-  "ae"
-  "scs"
-  "25"
-  "1958"
-  "324"
-  "brenckmanm"
-  "experimental"
-  "investigation"
-  "the"
-  "aerodynamics"
-  "of"
-  "wing"
-  "in"
-  "a"
-  "slipstream"
-  ))
+))
 
 
+
+
+(define (createIndex documents stopWords)
+  (let ([termList (cleanStopWords stopWords (documentCleaner documents)) ])
+    (createFullTermList termList documents)
+  )
+)
+
+(define principal (createIndex A B))
