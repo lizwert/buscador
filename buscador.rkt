@@ -70,7 +70,7 @@
 
 
 
-;(define (termQuery index term documents)
+;(define (termQuery index term documents) OK
       
   
 (define (getTerm listTerm term)
