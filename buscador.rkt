@@ -3567,6 +3567,10 @@
   )
 )
 
+(define (phraseQuery index term documents)
+  
+)
+
 
 (define (termSort list)
   (if (null? list)
@@ -3775,7 +3779,7 @@
   (if (null? Lista1)
       '() 
       (if (= x (car Lista1)) 
-          (deleteNumber x (cdr Lista1)) 
+          (cdr Lista1) 
           (cons (car Lista1) (deleteNumber x (cdr Lista1)))
       )
   )
