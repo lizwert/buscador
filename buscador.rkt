@@ -42,7 +42,7 @@
 
 ;Un indice invertido sera representado por un conjunto de listas de la siguiente manera:
 ;
-;  (define Index_Cualquiera '( lista_de_terminos cantidad_de_documentos lista_de_datos_de_documentos))
+;  (define Index_Cualquiera '( lista_de_terminos )
 ;
 ;   Donde el indice invertido es un una lista que en su interior se compone por mas listas:
 ;
@@ -56,9 +56,6 @@
 ;
 ;                         (define lista_documentos_cualquiera '(ID frecuency))
 ;
-;              *cantidad_de:documentos: es un valor numerico que solo informa cuantos documentos existen en el indice.
-;
-;              *lista_de_datos_de_documentos: es una lista que se compone de los principales datos de un documento:
 ;
 ;              (define lista_de_datos_de_documentos_cualquiera '(ID_del_documento titulo autor bibliografia))
 ;
