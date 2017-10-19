@@ -3567,9 +3567,46 @@
   )
 )
 
-;(define (phraseQuery index stopwords phrase documents)
+(define (phraseQuery index stopwords phrase documents)
+  (let ([termSeparation (map (lambda (x)
+                               (getTerm mainIndex x)
+                              )
+                             (cleanStopWords stopwords
+                                             (separator (string->list phrase) '())
+                             )
+                        )
+        ])
+       (createTermResult (comparativeAllTerm (car termSeparation) termSeparation)
+                         documents
+       )
+  )
+)
+
+
+(define (ranking results orderType)
+  (if (null? results)
+      '()
+      (if (number?  orderType)
+          (if (or (= orderType 1) (= orderType 2))
+              (if (= orderType 1)
+                  (reverse (termSort results))
+                  (termSort results)
+              )
+              '()
+          )
+          '()
+      )
+  )
+)
+                  
   
-;)
+        
+(define (Results->String results)
+  (if (list? results)
+      (if (null? results)
+          (display "no existen mas resultados")
+  
+
 
 
 (define (comparativeTermFrecuency frecuency Term)
@@ -3617,14 +3654,14 @@
 (define (termSort list)
   (if (null? list)
       '()
-      (cons (searchHigher list) (termSort (deleteNumber (searchHigher list) list)))
+      (cons (searchHigher list) (termSort (deleteNumber (car (searchHigher list)) list)))
   )
 )
 
 (define (searchHigher list)
   (if (null? list)
-      0
-      (if (> (car list) (searchHigher (cdr list)))
+      '(0)
+      (if (> (caar list) (car (searchHigher (cdr list))))
           (car list)
           (searchHigher (cdr list))
       )
@@ -3826,7 +3863,7 @@
 (define (deleteNumber x Lista1)
   (if (null? Lista1)
       '() 
-      (if (= x (car Lista1)) 
+      (if (= x (caar Lista1)) 
           (cdr Lista1) 
           (cons (car Lista1) (deleteNumber x (cdr Lista1)))
       )
@@ -3926,6 +3963,8 @@
 ;(trace deleteItem)
 ;(trace searchStringInList)
 (trace comparativeAllTerm)
+(trace termSort)
+(trace searchHigher)
 ;(repetidos (createListTerm (car(cdr(car A))) '()))
 
 (define Y '("study"
