@@ -3599,12 +3599,24 @@
   )
 )
                   
+(define (displayResultData result)
+  (let ([title (car (cddr (car result)))]
+        [author (car (cdddr (car result)))]
+        )
+        (display "El titulo del texto es : \n")
+        (display title)
+        (display "\n\n\n")
+        (display "El autor del texto es : \n")
+        (display author)
+  )
+)
   
         
 (define (Results->String results)
   (if (list? results)
       (if (null? results)
           (display "no existen mas resultados")
+          (displayResultData (car result))
   
 
 
@@ -3722,7 +3734,7 @@
               
   
 (define (getFrecuencyDocument word document)
-  (let ([TermList (createListTerm document '())])
+  (let ([TermList (createListTerm document)])
     (if (= (duplyCount TermList word) 0)
         '()
         (list (car document) (duplyCount TermList word))
@@ -3782,12 +3794,12 @@
           
 
 
-(define (createListTerm list emptyList)
+(define (createListTerm list)
   (if (null? list)
-      emptyList
+      '()
       (if (string? (car list))
-          (createListTerm (cdr list) (append (separator (string->list (car list)) '()) emptyList))
-          (createListTerm (cdr list) emptyList)
+          (append (string-split (car list)) (createListTerm (cdr list)))
+          (createListTerm (cdr list))
       )
   )
 )
@@ -3804,7 +3816,6 @@
        (append
         (removeID(car (cdr (car documents))))
         (getAllTermList (cdr documents)))
-     '()
      )
   )
 )
@@ -3962,9 +3973,9 @@
 ;(trace cleanStopWords)
 ;(trace deleteItem)
 ;(trace searchStringInList)
-(trace comparativeAllTerm)
-(trace termSort)
-(trace searchHigher)
+;(trace comparativeAllTerm)
+;(trace termSort)
+;(trace searchHigher)
 ;(repetidos (createListTerm (car(cdr(car A))) '()))
 
 (define Y '("study"
