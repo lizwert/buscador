@@ -3573,6 +3573,61 @@
 )
 
 
+
+;*** Función de pertenencia ***:
+;
+
+(define (index? index)
+  (if (null? index)
+      #t
+      (if (null? (car index))
+        #f  
+        (if (and (term? (car index)) (index? (cdr index)))
+            #t
+            #f
+            )
+        )
+      )
+)
+
+(define (term? Term)
+  (if (null? Term)
+      #t
+     (if (string? (car Term))
+         (if (null? (cdr Term))
+          #f
+          (if (listOfList? (cdr Term))
+              #t
+              #f
+              )
+         )
+         #f
+     )
+     
+  ) 
+)
+
+(define (listOfList? term)
+  (if (null? term)
+      #t
+      (if (and (if (list? (car term))
+                   (if (and (number? (caar term)) (number? (car (cdr (car term)))))
+                       (if (and (> (caar term) 0) (> (car (cdr (car term))) 0))
+                           #t
+                           #f
+                           )
+                       #f
+                       )
+                   #f
+                   )
+                (listOfList? (cdr term))
+                )
+          #t
+          #f
+          )
+      )
+)
+
 ;*** Funciones Selectoras ***:
 ;
 
@@ -3604,7 +3659,7 @@
 ;SALIDA: una lista de resultados, esta lista contembla los datos de los documentos (ID, titulo, autor,bibliografia, texto)
 ;        con un Ranking asociado.
 (define (phraseQuery index stopwords phrase documents)
-	(if (and (null? index) (null? documents) (string? term))
+	(if (and (null? index) (null? documents) (string? phrase))
 		(if (index? index)
 			;Utilizacion de funcion anonima para aplicar la funcion "getTerm" por medio de la funcion "map" a una lista de terminos
 			 (let ([termSeparation (map (lambda (x)
@@ -3976,48 +4031,7 @@
 
 ;############################ Funciones auxiliares ############################
 
-;Funcion que retorna la primera palabra de una lista de caracteres.
-;ENTRADA: una lista de caracteres del siguiente formato '(#\h #\o #\l #\a) y una lista vacia.
-;SALIDA: la primera palabra que exista antes de un espacio o que la lista sea nula.
-;RECURSION: lineal
-(define (extractor stringList list)
-  (if (null? stringList)
-      (list->string (reverse list))
-      (if (char=? (car stringList )  #\space)
-          (list->string (reverse list))
-          (extractor (cdr stringList) (cons (car stringList ) list ))
-      )
-   )
-)
-;Funcion que remueve la primera palabra de una lista de caracteres
-;ENTRADA: una lista de caracteres del siguiente formato '(#\h #\o #\l #\)
-;SALIDA: el resto de la lista sin la primera palabra
-;RECURSION: cola
-(define (removeFirst stringList)
-  (if (null? stringList)
-      stringList
-      (if (char=? (car stringList )  #\space)
-          (cdr stringList)
-          (removeFirst (cdr stringList))
-      )
-   )
-)
 
-;Funcion que separa por espacios las palabras de un string.
-;ENTRADA: una lista de caracteres del siguiente formato '(#\h #\o #\l #\a) y una lista vacia.
-;SALIDA: una listas de string separadas y sin espacios
-;RECURSION: lineal
-(define (separator stringList list)
-  (let ([frist (removeFirst stringList)])
-      (if (null? stringList)
-         (reverse list)
-         (if (null? (string->list (extractor stringList '())))
-             (separator frist list)
-             (separator frist (cons (extractor stringList '()) list))
-          )
-      )
-   )
-)
 
 (define (removeChar char stringList)
   (if (null? stringList)
@@ -4058,6 +4072,9 @@
 ;(trace searchHigher)
 ;(trace displayResultData)
 ;(trace Results->String)
+;(trace index?)
+;(trace term?)
+;(trace listOfList?)
 ;(repetidos (createListTerm (car(cdr(car A))) '()))
 
 (define Y '("study"
