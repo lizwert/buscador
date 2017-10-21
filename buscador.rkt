@@ -14,9 +14,9 @@
 (define B '("a" "about" "above" "across" "after" "afterwards" "again" "against" "all" "almost" "alone" "along" "already" "also" "although" "always" "am" "among" "amongst" "amoungst" "amount" "an" "and" "another" "any" "anyhow" "anyone" "anything" "anyway" "anywhere" "are" "around" "as" "at" "back" "be" "became" "because" "become" "becomes" "becoming" "been" "before" "beforehand" "behind" "being" "below" "beside" "besides" "between" "beyond" "bill" "both" "bottom" "but" "by" "call" "can" "cannot" "cant" "co" "computer" "con" "could" "couldnt" "cry" "de" "describe" "detail" "do" "done" "down" "due" "during" "each" "eg" "eight" "either" "eleven" "else" "elsewhere" "empty" "enough" "etc" "even" "ever" "every" "everyone" "everything" "everywhere" "except" "few" "fifteen" "fify" "fill" "find" "fire" "first" "five" "for" "former" "formerly" "forty" "found" "four" "from" "front" "full" "further" "get" "give" "go" "had" "has" "hasnt" "have" "he" "hence" "her" "here" "hereafter" "hereby" "herein" "hereupon" "hers" "herse" "him" "himse" "his" "how" "however" "hundred" "i" "ie" "if" "in" "inc" "indeed" "interest" "into" "is" "it" "its" "itse" "keep" "last" "latter" "latterly" "least" "less" "ltd" "made" "many" "may" "me" "meanwhile" "might" "mill" "mine" "more" "moreover" "most" "mostly" "move" "much" "must" "my" "myse" "name" "namely" "neither" "never" "nevertheless" "next" "nine" "no" "nobody" "none" "noone" "nor" "not" "nothing" "now" "nowhere" "of" "off" "often" "on" "once" "one" "only" "onto" "or" "other" "others" "otherwise" "our" "ours" "ourselves" "out" "over" "own" "part" "per" "perhaps" "please" "put" "rather" "re" "same" "see" "seem" "seemed" "seeming" "seems" "serious" "several" "she" "should" "show" "side" "since" "sincere" "six" "sixty" "so" "some" "somehow" "someone" "something" "sometime" "sometimes" "somewhere" "still" "such" "system" "take" "ten" "than" "that" "the" "their" "them" "themselves" "then" "thence" "there" "thereafter" "thereby" "therefore" "therein" "thereupon" "these" "they" "thick" "thin" "third" "this" "those" "though" "three" "through" "throughout" "thru" "thus" "to" "together" "too" "top" "toward" "towards" "twelve" "twenty" "two" "un" "under" "until" "up" "upon" "us" "very" "via" "was" "we" "well" "were" "what" "whatever" "when" "whence" "whenever" "where" "whereafter" "whereas" "whereby" "wherein" "whereupon" "wherever" "whether" "which" "while" "whither" "who" "whoever" "whole" "whom" "whose" "why" "will" "with" "within" "without" "would" "yet" "you" "your" "yours" "yourself" "yourselves" ))
 
 
-;Definicion de la un indice completo generado por (createIndex): Tiempo de ejecución 52.36 seg.
+;Definicion de la un indice  completo "mainIndex" generado por (createIndex): Tiempo de ejecución 41.36 seg.
 ;este indice contiene la indexacion de todas las palabras de los 100 documents (19.348 palabras)
-; Tiempo de ejecucion para un archivo con 50 documentos : 17.85 seg.
+; Tiempo de ejecucion para un archivo con 50 documentos : 12.04 seg.
 
 (define mainIndex '(("ting-yili" (2 1))
   ("troy," (2 1))
@@ -3496,7 +3496,7 @@
 )
 
 
-; ######################Funciones que operan sobre StopWords######################
+; ###################### Funciones que operan sobre StopWords ######################
 
 
 ;Funcion Booleana que informa si una palabra es un stopWord
@@ -3544,14 +3544,25 @@
 ;                         (define lista_documentos_cualquiera '(ID frecuency))
 ;
 ;
-;              (define lista_de_datos_de_documentos_cualquiera '(ID_del_documento titulo autor bibliografia))
+;  Ejemplo de Index
 ;
-;                    *ID_del_documento: dato numero que indica que documento es.
-;                    *titulo: es un arreglo de strings que corresponde al titulo del documento.
-;                    *autor: es un arreglo de string que corrresponde a los autores del documento.
-;                    *bibliografia: es un arreglo de string que corresponde a la bibliografia del documento.
+;  TDA index ='(
+;	            ("suction" (44 1) (87 1))
+;	   			("recently" (2 1) (44 1) (46 1) (87 1) (90 1))
+;	   			("gupta" (44 1) (87 1))
+;	  			("generalized" (14 1) (20 1) (44 1) (87 1) (92 1))
+;	  			("convection" (44 1) (87 1))
+;              )
 
 
+;***Constructor***:
+;
+;Funcion que construye la representación del TDA Index. Para realizar la creación, se toman todas las palabras del documento,
+;separandolas por espacios y eliminado las repetidas y los puntos. Posterior a eso se buscan estas palabras en el documento,
+;obteniendo su frecuencia por documento
+;
+;ENTRADA: una lista con los documentos (ID,titulo,autores,bibliografia y texto) y una lista con las StopWords
+;SALIDA: una lista de terminos donde cada termino tiene asociado la frecuencia por documeto (TDA index).
 (define (createIndex documents stopWords)
   (let ([termList (cleanStopWords stopWords (documentCleaner documents)) ])
     (if (null? termList)
@@ -3561,27 +3572,65 @@
   )
 )
 
+
+;*** Funciones Selectoras ***:
+;
+
+
+
+
+;Función que obtiene una lista de resultados con todos los documentos que poseen el termino a buscar.
+;ENTRADA: un indice invertido, un termino en forma de string y una lista de documentos.
+;SALIDA: una lista de resultados, esta lista contembla los datos de los documentos (ID, titulo, autor,bibliografia, texto)
+;        con un Ranking asociado.
 (define (termQuery index term documents)
-  (let ([termList (getTerm index term)])
-    (createTermResult termList documents)
-  )
+	(if (and (null? index) (null? documents) (string? term))
+		(if (index? index)
+			 (let ([termList (getTerm index term)])
+    				(createTermResult termList documents)
+  			 )
+  	         '()
+  	    )
+  	    '()
+  	)
+  
 )
 
+
+;Función que obtiene una lista de resultados con todos los documentos que poseen todos los terminos buscados. (obtiene
+;la interseccion de los resultados de cada termino buscado en la frase)
+;ENTRADA: un indice invertido, una frase en forma de string, una lista de stopWords (para limpiar la consulta de las StopWords) 
+;         y una lista de documentos.
+;SALIDA: una lista de resultados, esta lista contembla los datos de los documentos (ID, titulo, autor,bibliografia, texto)
+;        con un Ranking asociado.
 (define (phraseQuery index stopwords phrase documents)
-  (let ([termSeparation (map (lambda (x)
-                               (getTerm mainIndex x)
-                              )
-                             (cleanStopWords stopwords
-                                             (separator (string->list phrase) '())
-                             )
-                        )
-        ])
-       (createTermResult (comparativeAllTerm (car termSeparation) termSeparation)
-                         documents
-       )
-  )
+	(if (and (null? index) (null? documents) (string? term))
+		(if (index? index)
+			;Utilizacion de funcion anonima para aplicar la funcion "getTerm" por medio de la funcion "map" a una lista de terminos
+			 (let ([termSeparation (map (lambda (x)
+                                        (getTerm index x) 
+                                        )
+                                
+                                        (cleanStopWords stopwords
+                                                        (string-split phrase)
+                                        )
+                                  )
+        		   ])
+                  (createTermResult (comparativeAllTerm (car termSeparation) termSeparation)
+                                     documents
+                  )
+             )
+  	         '()
+  	    )
+  	    '()
+  	)
+  
 )
 
+;Funcion que ordena de forma asendente o desendente dependiendo del valor numerico entregado ( 1 o 2 ). La función
+;ordena la lista de resultado por el parametro Ranking dentro de cada resultado.
+;ENTRADA: una lista de resultados y un valor numerico para identificar el modo de ordenamiento deseado.
+;SALIDA: una lista de resultados ordenado asendente o desendente (si no se especifica el valor, devuelve la lista sin ordenar)
 
 (define (ranking results orderType)
   (if (null? results)
@@ -3592,31 +3641,62 @@
                   (reverse (termSort results))
                   (termSort results)
               )
-              '()
+              results
           )
           '()
       )
   )
 )
-                  
+
+
+
+
+;Funcion que despliega la informacion del ID, titulo y autor de UN resultado.
+;ENTRADA: un resultado de la forma ->  '(Ranking ID titulo autores bibliografia texto)
+;SALIDA: la funcion no posee retorno pero se despliega la informacion entendible para el usuario.                 
 (define (displayResultData result)
-  (let ([title (car (cddr (car result)))]
-        [author (car (cdddr (car result)))]
-        )
+  (if (null? result)
+      (display "\n")
+      (let ([title (car (cddr  result))]
+            [author (car (cdddr result))]
+            )
+        (display "***************************************************************************\n")
+        (display "\n")
+        (display "***************************\n")
+        (display "* Numero de documento : ")
+        (display (car (cdr result)))
+        (display "*\n")
+        (display "***************************\n\n")
         (display "El titulo del texto es : \n")
         (display title)
         (display "\n\n\n")
         (display "El autor del texto es : \n")
         (display author)
+        (display  "\n\n")
+        (display "***************************************************************************\n\n")
+        )
   )
 )
   
-        
+
+
+;Funcion que ordena de forma asendente o desendente dependiendo del valor numerico entregado ( 1 o 2 ). La función
+;ordena la lista de resultado por el parametro Ranking dentro de cada resultado.
+;ENTRADA: una lista de resultados y un valor numerico para identificar el modo de ordenamiento deseado.
+;SALIDA: una lista de resultados ordenado asendente o desendente (si no se especifica el valor, devuelve la lista sin ordenar)
+;RECURSION: Cola      
 (define (Results->String results)
-  (if (list? results)
-      (if (null? results)
+   (if (null? results)
           (display "no existen mas resultados")
-          (displayResultData (car result))
+          (let ([StringResult (displayResultData (car results))])
+                StringResult
+                (Results->String (cdr results))
+            )
+                
+          )
+                              
+     )
+  
   
 
 
@@ -3976,6 +4056,8 @@
 ;(trace comparativeAllTerm)
 ;(trace termSort)
 ;(trace searchHigher)
+;(trace displayResultData)
+;(trace Results->String)
 ;(repetidos (createListTerm (car(cdr(car A))) '()))
 
 (define Y '("study"
@@ -3994,108 +4076,108 @@
 
 ;(define principal (createIndex A B))
 
-(define mainR 
-'(("experimental"
-  (1 3)
-  (11 1)
-  (12 1)
-  (17 1)
-  (19 1)
-  (25 1)
-  (29 1)
-  (30 1)
-  (35 1)
-  (41 1)
-  (47 1)
-  (52 2)
-  (53 1)
-  (58 1)
-  (69 1)
-  (70 1)
-  (74 2)
-  (78 1)
-  (84 3)
-  (99 2))
-("investigation"
-  (1 2)
-  (8 1)
-  (9 2)
-  (19 2)
-  (29 1)
-  (30 2)
-  (44 1)
-  (45 2)
-  (50 3)
-  (73 2)
-  (74 1)
-  (78 1)
-  (79 1)
-  (80 1)
-  (82 3)
-  (84 3)
-  (89 3)
-  (90 1))
-("flow"
-  (1 1)
-  (2 7)
-  (3 3)
-  (4 4)
-  (6 2)
-  (7 1)
-  (9 3)
-  (16 1)
-  (17 1)
-  (18 7)
-  (19 1)
-  (21 2)
-  (22 1)
-  (23 5)
-  (24 1)
-  (25 7)
-  (26 3)
-  (27 4)
-  (28 5)
-  (33 5)
-  (34 7)
-  (35 3)
-  (36 2)
-  (37 5)
-  (38 1)
-  (39 5)
-  (44 1)
-  (45 6)
-  (48 5)
-  (49 2)
-  (50 2)
-  (51 1)
-  (52 1)
-  (53 1)
-  (54 1)
-  (55 1)
-  (56 2)
-  (57 2)
-  (58 2)
-  (59 4)
-  (60 1)
-  (61 3)
-  (63 3)
-  (64 1)
-  (69 1)
-  (70 3)
-  (72 1)
-  (73 2)
-  (74 2)
-  (81 3)
-  (84 5)
-  (85 2)
-  (86 4)
-  (87 3)
-  (88 5)
-  (89 5)
-  (91 2)
-  (93 1)
-  (94 6)
-  (96 4)
-  (98 3))
-  )
+(define mainR '(
+	("experimental"
+	  (1 3)
+	  (11 1)
+	  (12 1)
+	  (17 1)
+	  (19 1)
+	  (25 1)
+	  (29 1)
+	  (30 1)
+	  (35 1)
+	  (41 1)
+	  (47 1)
+	  (52 2)
+	  (53 1)
+	  (58 1)
+	  (69 1)
+	  (70 1)
+	  (74 2)
+	  (78 1)
+	  (84 3)
+	  (99 2))
+	("investigation"
+	  (1 2)
+	  (8 1)
+	  (9 2)
+	  (19 2)
+	  (29 1)
+	  (30 2)
+	  (44 1)
+	  (45 2)
+	  (50 3)
+	  (73 2)
+	  (74 1)
+	  (78 1)
+	  (79 1)
+	  (80 1)
+	  (82 3)
+	  (84 3)
+	  (89 3)
+	  (90 1))
+	("flow"
+	  (1 1)
+	  (2 7)
+	  (3 3)
+	  (4 4)
+	  (6 2)
+	  (7 1)
+	  (9 3)
+	  (16 1)
+	  (17 1)
+	  (18 7)
+	  (19 1)
+	  (21 2)
+	  (22 1)
+	  (23 5)
+	  (24 1)
+	  (25 7)
+	  (26 3)
+	  (27 4)
+	  (28 5)
+	  (33 5)
+	  (34 7)
+	  (35 3)
+	  (36 2)
+	  (37 5)
+	  (38 1)
+	  (39 5)
+	  (44 1)
+	  (45 6)
+	  (48 5)
+	  (49 2)
+	  (50 2)
+	  (51 1)
+	  (52 1)
+	  (53 1)
+	  (54 1)
+	  (55 1)
+	  (56 2)
+	  (57 2)
+	  (58 2)
+	  (59 4)
+	  (60 1)
+	  (61 3)
+	  (63 3)
+	  (64 1)
+	  (69 1)
+	  (70 3)
+	  (72 1)
+	  (73 2)
+	  (74 2)
+	  (81 3)
+	  (84 5)
+	  (85 2)
+	  (86 4)
+	  (87 3)
+	  (88 5)
+	  (89 5)
+	  (91 2)
+	  (93 1)
+	  (94 6)
+	  (96 4)
+	  (98 3))
+	  )
  )
