@@ -109,7 +109,7 @@
              #f
          )
         #f
-     
+     )
   ) 
 )
 ;Funcion booleana que da informacion si un elemento ingresado como parametro es una lista de listas
@@ -338,11 +338,10 @@
   
 
 
-;Funcion que ordena de forma asendente o desendente dependiendo del valor numerico entregado ( 1 o 2 ). La función
-;ordena la lista de resultado por el parametro Ranking dentro de cada resultado.
-;ENTRADA: una lista de resultados y un valor numerico para identificar el modo de ordenamiento deseado.
-;SALIDA: una lista de resultados ordenado asendente o desendente (si no se especifica el valor, devuelve la lista sin ordenar)
-;RECURSION: Cola      
+;Funcion que despliega la informacion del ID, titulo y autor de TODA la lista de resultados.
+;ENTRADA: un resultado de la forma ->  '(Ranking ID titulo autores bibliografia texto)
+;SALIDA: la funcion no posee retorno pero se despliega la informacion entendible para el usuario. 
+;RECURSION: Cola   
 (define (Results->String results)
    (if (null? results)
           (display "no existen mas resultados")
