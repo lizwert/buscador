@@ -1,5 +1,5 @@
 %programa creado en C [Nicolas Gutierrez]
-%documentos creados el : 30/10/2017 || 21:16
+%documentos creados el : 30/10/2017 || 20:34
 %listado de indice para Prolog
 
 
@@ -2561,7 +2561,7 @@ indice( "easily", [ [100,1] ]).
 
 
 
-%Lista de documentos para programa en prolog. 
+%Lista de documentos para programa en prolog.
 
 
 
