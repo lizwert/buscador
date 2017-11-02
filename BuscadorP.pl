@@ -5988,6 +5988,12 @@ getListTermIDs([],[]).
 
 
 
+
+getAllFrecuency([],[]).
+getAllFrecuency([[X|_]|Ls],[X|L1]):-
+    getAllIDs(Ls,L1).
+
+
 findElement([X|_],X).
 
 findElement([_|Xs],Y):-
@@ -6101,3 +6107,8 @@ listCount([_|Ls],X):-
 
 %["lucas", "julia", "julio", "jose"]
 
+
+
+
+termTotalCount(Term,Frequency):-
+    getListTermIDs(

@@ -6094,6 +6094,7 @@ numDocuments(Results, Count):-
 
 
 listCount([],0).
+
 listCount([_|Ls],X):-
     listCount(Ls,X1),X is X1+1.
 
