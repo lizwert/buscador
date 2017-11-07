@@ -5989,11 +5989,6 @@ getListTermIDs([],[]).
 
 
 
-getAllFrecuency([],[]).
-getAllFrecuency([[X|_]|Ls],[X|L1]):-
-    getAllIDs(Ls,L1).
-
-
 findElement([X|_],X).
 
 findElement([_|Xs],Y):-
@@ -6082,7 +6077,7 @@ exactMatch(Phrase, Result):-
 
 getDocumentTitle([],[]).
 
-getDocumentTitle([X|Xs],[[X|T]|Ds]):-
+getDocumentTitle([X|Xs],[[X|[T]]|Ds]):-
     document(X,T,_,_,_),
     getDocumentTitle(Xs,Ds),!.
 
@@ -6106,9 +6101,73 @@ listCount([_|Ls],X):-
 
 
 %["lucas", "julia", "julio", "jose"]
+%
+%
+getAllFrecuency([],[]).
+
+getAllFrecuency([[_|[X|_]]|Ls],[X|Xs]):-
+    getAllFrecuency(Ls,Xs).
 
 
 
+frecuencyCount([],0).
+
+frecuencyCount([L|Ls],R):-
+    frecuencyCount(Ls,R1),
+    R is R1+L.
 
 termTotalCount(Term,Frequency):-
-    getListTermIDs(
+    indice(Term,List),
+    getAllFrecuency(List,ListFrecuency),
+    frecuencyCount(ListFrecuency,Frequency).
+
+
+listAllFrecuency(Fs):-
+    findall(F,termTotalCount(_,F),Fs).
+
+maxFrecuency(Term):-
+   termTotalCount(Term,F),
+   listAllFrecuency(LF),
+   maxList(LF,Y),
+   F=Y,!.
+
+
+
+
+listAllIDs(Is):-
+    findall(X,document(X,_,_,_,_),Is).
+
+
+deleteElementOfList([],Is,Is).
+
+deleteElementOfList([R|Rs],Is,X):-
+    delete(Is,R,L),
+    deleteElementOfList(Rs,L,X).
+
+docsNotContain(Term, Documents):-
+    indice(Term,L),
+    getAllIDs(L,R),
+    listAllIDs(IDs),
+    deleteElementOfList(R,IDs,NC),
+    getDocumentTitle(NC,Documents).
+
+
+
+
+
+
+
+
+
+
+maxList([X|Xs],Max):- compareMax(Max, X, Xs).
+
+compareMax(M, M, []):- !.
+
+compareMax(X, PosMax, [Max|Ls]):-
+    Max >= PosMax, !,
+    compareMax(X, Max, Ls).
+
+compareMax(X, PosMax, [L|Ls]):-
+    L =< PosMax,
+    compareMax(X, PosMax, Ls).
