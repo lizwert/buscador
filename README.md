@@ -19,7 +19,7 @@ Para poder comprender el paradigma funcional los profesores del curso “Paradig
 Este buscador debe funcionar a base de la creación de un índice invertido para un conjunto de documentos presentes en un solo archivo.  El programa debe respetar las características funcionales propias de un paradigma imperativo,es decir, seguir una linealidad de código y ejecución.
 El programa debe solucionar los sub-problemas como la creación de un índice invertido, creación de una función de Ranking, y un despliegue de resultados. Además de esto, se debe implementar una serie de estructuras que serán una base importante al momento de la programación de la solución. 
 
-[Imgur](https://i.imgur.com/NNChNLQ.png)
+![Imgur](https://i.imgur.com/NNChNLQ.png)
 
 
 
