@@ -1,0 +1,71 @@
+ createIndex: 1
+
+ index?: 1
+
+ term?: 1
+
+ listOfList?: 0.75
+
+ termQuery: 1
+
+ phraseQuery: 1
+
+ getTerm: 0.75
+
+ saveIndex: 0.75
+
+ loadIndex: 0.75
+
+ ranking: 1
+
+ displayResultData: 1
+
+ Results->String: 1
+
+ documentCleaner: 1
+
+ comparativeTermFrecuency: 1
+
+ comparativeTermList: 1
+
+ comparativeAllTerm: 1
+
+ termSort: 0.75
+
+ searchHigher: 1
+
+ getAllFrencuency: 1
+
+ createTermResult: 1
+
+ getFrecuency: 0.75
+
+ getFrecuencyDocument: 0.5
+
+ AllFrecuencyWord: 0.75
+
+ createFullTermList: 1
+
+ duplyCount: 1
+
+ searchStringInList: 1
+
+ createListStrings: 1
+
+ removeID document: 1
+
+ getAllTermList: 1
+
+ duply Lista1: 1
+
+ cleanStopWords: 1
+
+ getDocument: 1
+
+ deleteItem: 1
+
+ deleteNumber: 1
+
+ searchStopWord: 1
+
+
