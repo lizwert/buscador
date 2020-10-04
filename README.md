@@ -7,7 +7,7 @@ Este repositorio contiene los laboratorios de C, Scheme y Prolog:
 
 - Laboratorio 1 : [C](Lab1)
 - Laboratorio 2 : [Scheme](Lab2)
-- Laboratorio 3 : [Scheme](Lab3)
+- Laboratorio 3 : [Prolog](Lab3)
 
 
 
